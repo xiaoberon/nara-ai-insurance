@@ -35,3 +35,5 @@ table{font-size:13px}th,td{padding:11px}.db-summary small{font-size:10px}.db-lay
 .evaluation-result-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px}.export-button{flex:0 0 auto;white-space:nowrap}
 .evaluation-validity{padding:11px 14px;border-radius:9px;font-weight:800}.evaluation-validity.valid{background:#e4f3eb;color:#125d43}.evaluation-validity.invalid{background:#fff0f0;color:#9a3030;border:1px solid #eccaca}
 @media(max-width:760px){.batch-options{grid-template-columns:1fr}.batch-options dl{display:grid}.batch-options dl div{min-width:0}}
+
+.customer-view{margin:14px 0;padding:18px;background:#fff;border:1px solid #dbe5dc;border-radius:10px}.customer-view h2{margin-top:0}.trace-step blockquote{margin:6px 0;padding:6px 10px;border-left:3px solid #a66b13;background:#fff7e8}

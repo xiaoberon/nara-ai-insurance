@@ -39,12 +39,12 @@ describe('Recommendation stage',()=>{
     expect(result.output?.recommended_products.some((x)=>x.product_id==='P004')).toBe(true);
   });
 
-  it('exposes a filter trace for every product and score formula for every result',async()=>{
+  it('exposes a filter trace for every product and the scored breakdown for every result',async()=>{
     const need=(await runChat('Sedan车龄3年续保，预算900，要水浸。','hybrid',llm)).output!;
     const coupon=(await runCoupon(need,users[0],coupons,products,'hybrid',llm)).output!;
     const result=await runRecommendation(need,users[0],coupon,products,'hybrid',llm);
     expect(result.trace.filter((x)=>x.kind==='filter')).toHaveLength(products.length);
     expect(result.trace.filter((x)=>x.kind==='score')).toHaveLength(result.output!.recommended_products.length);
-    expect(result.trace.find((x)=>x.kind==='score')?.logic).toContain('保障分=60');
+    expect(result.trace.find((x)=>x.kind==='score')?.output).toMatchObject({rank:1,score_breakdown:{coverage:60,budget:40}});
   });
 });

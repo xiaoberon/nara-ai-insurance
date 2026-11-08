@@ -21,20 +21,24 @@ function evaluateCoupon(coupon:Coupon,profile:UserProfile,products:InsuranceProd
     {rule:'product_scope',label:'适用产品范围',actual:coupon.eligible_product_ids,expected:`双方映射一致、产品在售且保费不低于 MYR ${coupon.minimum_premium}`,pass:productScope,code:'NO_ELIGIBLE_PRODUCT_SCOPE'},
     {rule:'maximum_discount',label:'最大折扣限制',actual:coupon.discount_value,expected:`不超过 MYR ${coupon.maximum_discount}`,pass:coupon.discount_value<=coupon.maximum_discount,code:'MAX_DISCOUNT_EXCEEDED'}
   ];
+  if(coupon.extra_for_established_user) {
+    const purchases=profile.historical_purchase_count;
+    const months=profile.platform_tenure_months??0;
+    const member=profile.active_membership===true;
+    checks.push({rule:'established_customer',label:'资深用户额外券',actual:{purchases,months,member},expected:'买过至少2次保险，且使用平台满12个月或有有效会员',pass:purchases>=2&&(months>=12||member),code:'LOYALTY_NOT_ELIGIBLE'});
+  }
   const failure=checks.find((check)=>!check.pass);
   return {coupon,checks,eligible:!failure,firstFailure:failure?.code??null};
 }
 
-function toDecision(selected:Coupon|null,evaluations:Evaluation[],mode:'hybrid'|'rules_only'):CouponDecision{
-  const rejectedCoupons=evaluations.filter((x)=>!x.eligible).map((x)=>({coupon_id:x.coupon.coupon_id,reason_code:x.firstFailure!}));
-  if(!selected)return rejected(['NO_ELIGIBLE_COUPON'],rejectedCoupons);
-  return {decision:'grant',selected_coupon_id:selected.coupon_id,discount_value:selected.discount_value,currency:'MYR',eligible_product_ids:selected.eligible_product_ids,reason_codes:['RULE_PREFILTER_PASSED',mode==='hybrid'?'LLM_RANK_RECORDED':'DETERMINISTIC_RANK_RECORDED','FINAL_RULE_CHECK_PASSED'],rejected_coupon_ids:rejectedCoupons,fallback_status:'none'};
+function productScope(coupon:Coupon,products:InsuranceProduct[]){
+  return products.filter(p=>p.active&&p.annual_premium>=coupon.minimum_premium&&coupon.eligible_product_ids.includes(p.product_id)&&p.coupon_ids.includes(coupon.coupon_id)).map(p=>p.product_id);
 }
 
-function ruleTrace(need:UserNeed,profile:UserProfile,evaluations:Evaluation[],upstreamBlocked:boolean):DecisionTraceStep[]{
-  const trace:DecisionTraceStep[]=[{step_id:'coupon-upstream-gate',stage:'coupon',kind:'validation',title:'上游需求门禁',description:'关键字段缺失或冲突时禁止继续发券。',input:{missing_fields:need.missing_fields,information_status:need.information_status},logic:'关键信息缺失或冲突 → 阻断',output:{blocked:upstreamBlocked},status:upstreamBlocked?'failed':'passed',reason_code:upstreamBlocked?'HIGH_RISK_COUPON_BLOCKED':'UPSTREAM_SCHEMA_VALID'}];
+function ruleTrace(need:UserNeed,profile:UserProfile,evaluations:Evaluation[],upstreamBlocked:boolean,missing:string[]):DecisionTraceStep[]{
+  const trace:DecisionTraceStep[]=[{step_id:'coupon-upstream-gate',stage:'coupon',kind:'validation',title:'检查上一环的信息是否足够',description:'车型未确认、续保意图不明或预算冲突时，先补问再决定是否发券。',input:{需要确认:missing,原始缺失字段:need.missing_fields,information_status:need.information_status},logic:'关键信息缺失或冲突 → 阻断',output:{blocked:upstreamBlocked,需要确认:missing},status:upstreamBlocked?'failed':'passed',reason_code:upstreamBlocked?'HIGH_RISK_COUPON_BLOCKED':'UPSTREAM_SCHEMA_VALID'}];
   for(const evaluation of evaluations){
-    trace.push({step_id:`coupon-${evaluation.coupon.coupon_id}`,stage:'coupon',kind:'rule',title:`规则预筛 ${evaluation.coupon.coupon_id}`,description:'按固定顺序检查资格；任一条件失败即不进入 LLM 候选池。',input:{batch_name:evaluation.coupon.batch_name,profile_user:profile.user_id,checks:evaluation.checks.map(({rule,label,actual,expected})=>({rule,label,actual,expected}))},logic:'市场 → 分群 → 续保窗口 → 活动状态 → 预算 → 频控 → 产品范围 → 最大折扣',output:{checks:evaluation.checks.map(({rule,label,pass,code})=>({rule,label,pass,reason_code:pass?'PASS':code})),eligible:!upstreamBlocked&&evaluation.eligible,first_failure:evaluation.firstFailure},status:upstreamBlocked?'info':evaluation.eligible?'passed':'failed',reason_code:evaluation.firstFailure??'COUPON_ELIGIBLE'});
+    trace.push({step_id:`coupon-${evaluation.coupon.coupon_id}`,stage:'coupon',kind:'rule',title:`规则预筛 ${evaluation.coupon.coupon_id}`,description:'按固定顺序检查资格；任一条件不满足，即排除这张券。',input:{batch_name:evaluation.coupon.batch_name,profile_user:profile.user_id,checks:evaluation.checks.map(({rule,label,actual,expected})=>({rule,label,actual,expected}))},logic:'市场 → 分群 → 续保窗口 → 活动状态 → 预算 → 频控 → 产品范围 → 最大折扣',output:{checks:evaluation.checks.map(({rule,label,pass,code})=>({rule,label,pass,reason_code:pass?'PASS':code})),eligible:!upstreamBlocked&&evaluation.eligible,first_failure:evaluation.firstFailure},status:upstreamBlocked?'info':evaluation.eligible?'passed':'failed',reason_code:evaluation.firstFailure??'COUPON_ELIGIBLE'});
   }
   return trace;
 }
@@ -53,22 +57,37 @@ export async function runCoupon(need:UserNeed|null,profile:UserProfile,coupons:C
     const decision=parsed.data;
     return {input:{need,profile_snapshot_id:profile.profile_snapshot_id,candidate_batches:coupons.map((x)=>x.coupon_id)},output:decision,decision_summary:['LLM 从全部原始券中直接选择；本对照组刻意跳过资格规则'],node_logs:[{node:'coupon.llm_decision',status:'warning',summary:decision.selected_coupon_id??'no coupon',duration_ms:Date.now()-started}],trace:[{step_id:'coupon-llm-only',stage:'coupon',kind:'llm',title:'LLM 直接发券（对照组）',description:'复用同一 LLM 节点，但不执行规则预筛和最终确认。',input:{candidate_batches:coupons.map((x)=>x.coupon_id)},logic:'全部券 → LLM选择 → 仅Schema校验',output:{decision},status:'warning',reason_code:'LLM_ONLY_UNSAFE_PATH'}],schema_valid:true,retry_count:0,fallback_status:decision.fallback_status};
   }
-  const upstreamBlocked=need.information_status==='needs_clarification'&&need.missing_fields.some((field)=>['vehicle.type','budget.conflict_requires_confirmation'].includes(field));
+  const missing=[
+    ...(need.vehicle.type==='unknown'?['车型']:[]),
+    ...(need.intent==='unknown'?['是否要续保']:[]),
+    ...(need.missing_fields.includes('budget.conflict_requires_confirmation')?['正确预算']:[]),
+  ];
+  const upstreamBlocked=missing.length>0;
   const evaluations=coupons.map((coupon)=>evaluateCoupon(coupon,profile,products,now));
-  const trace=ruleTrace(need,profile,evaluations,upstreamBlocked);
+  const trace=ruleTrace(need,profile,evaluations,upstreamBlocked,missing);
   if(upstreamBlocked){
     const decision=rejected(['UPSTREAM_FIELDS_INCOMPLETE','HIGH_RISK_COUPON_BLOCKED'],[],'clarification_required');
-    return {input:{need,profile_snapshot:{user_id:profile.user_id,market:profile.market,segment:profile.segment}},output:decision,decision_summary:['关键信息不完整，未进入候选券排序'],node_logs:[{node:'coupon.upstream',status:'warning',summary:'blocked',duration_ms:Date.now()-started}],trace,schema_valid:true,retry_count:0,fallback_status:decision.fallback_status};
+    return {input:{need,profile_snapshot:{user_id:profile.user_id,market:profile.market,segment:profile.segment}},output:decision,decision_summary:['关键信息不完整，先补问再发券'],node_logs:[{node:'coupon.upstream',status:'warning',summary:'blocked',duration_ms:Date.now()-started}],trace,schema_valid:true,retry_count:0,fallback_status:decision.fallback_status};
   }
   const eligible=evaluations.filter((x)=>x.eligible).map((x)=>x.coupon);
-  let selected:Coupon|null=null;
-  if(mode==='hybrid'&&eligible.length){
-    const suggestion=couponDecisionSchema.parse(await llm.chooseCoupon(need,profile,eligible));
-    selected=eligible.find((coupon)=>coupon.coupon_id===suggestion.selected_coupon_id&&coupon.discount_value===suggestion.discount_value)??null;
-    trace.push({step_id:'coupon-llm-rank',stage:'coupon',kind:'llm',title:'LLM 排序合资格券',description:'模型只能在规则预筛后的候选池中表达语义偏好。',input:{need_summary:need.evidence_summary,eligible_batches:eligible.map((x)=>x.coupon_id)},logic:'合资格券 → LLM语义排序',output:{selected_coupon_id:suggestion.selected_coupon_id,accepted:Boolean(selected)},status:selected?'passed':'warning',reason_code:selected?'LLM_RANK_ACCEPTED':'LLM_SELECTION_OUTSIDE_ELIGIBLE_SET'});
-  }else if(mode==='rules_only')selected=[...eligible].sort((a,b)=>b.discount_value-a.discount_value||a.coupon_id.localeCompare(b.coupon_id))[0]??null;
-  if(selected){const final=evaluateCoupon(selected,profile,products,now);if(!final.eligible)selected=null;}
-  const decision=toDecision(selected,evaluations,mode);
-  trace.push({step_id:'coupon-final-decision',stage:'coupon',kind:'validation',title:'规则最终确认',description:'再次确认候选仍满足资格、金额、预算和频控；规则拥有最终权威。',input:{selected_coupon_id:selected?.coupon_id??null},logic:'重新执行资格规则 → 输出最终券',output:{decision},status:decision.decision==='grant'?'passed':'info',reason_code:decision.decision==='grant'?'FINAL_RULE_CHECK_PASSED':'NO_ELIGIBLE_COUPON'});
-  return {input:{need,profile_snapshot:{profile_snapshot_id:profile.profile_snapshot_id,user_id:profile.user_id,market:profile.market,segment:profile.segment,renewal_due_days:profile.renewal_due_days,coupon_received_30d:profile.coupon_received_30d}},output:decision,decision_summary:[mode==='hybrid'?'规则预筛 → LLM排序 → 规则终审':'规则预筛 → 固定排序 → 规则终审',`合资格券 ${eligible.length} 张`,decision.decision==='grant'?`最终发放 ${decision.selected_coupon_id}`:'没有可发放的券'],node_logs:[{node:'coupon.hybrid_orchestration',status:'success',summary:`eligible=${eligible.length}; selected=${decision.selected_coupon_id??'none'}`,duration_ms:Date.now()-started}],trace,schema_valid:true,retry_count:0,fallback_status:decision.fallback_status};
+  const standard=eligible.filter(c=>!c.extra_for_established_user);
+  const extra=eligible.filter(c=>c.extra_for_established_user);
+  const options=standard.flatMap(base=>[
+    {base, extra:null as Coupon|null, ids:productScope(base,products), amount:base.discount_value, reason:null as string|null},
+    ...extra.map(add=>{
+      const ids=productScope(base,products).filter(id=>productScope(add,products).includes(id));
+      const amount=base.discount_value+add.discount_value;
+      const reason=!add.stackable||add.stack_with_coupon_id!==base.coupon_id?'不允许叠加':!ids.length?'没有共同适用产品':amount>(add.combined_discount_cap??0)?'超过组合优惠上限':null;
+      return {base,extra:add,ids,amount,reason};
+    }),
+  ]);
+  const selected=options.filter(x=>!x.reason&&x.ids.length).sort((a,b)=>b.amount-a.amount||a.base.coupon_id.localeCompare(b.base.coupon_id)||(a.extra?.coupon_id??'').localeCompare(b.extra?.coupon_id??''))[0];
+  const rejectedCoupons=evaluations.filter(x=>!x.eligible).map(x=>({coupon_id:x.coupon.coupon_id,reason_code:x.firstFailure!}));
+  const decision:CouponDecision=selected?{
+    decision:'grant',selected_coupon_id:selected.base.coupon_id,discount_value:selected.amount,currency:'MYR',eligible_product_ids:selected.ids,
+    applied_coupons:[selected.base,...(selected.extra?[selected.extra]:[])].map(c=>({coupon_id:c.coupon_id,name:c.name,amount:c.discount_value,tier:c.extra_for_established_user?'extra':'standard'})),
+    reason_codes:['RULE_PREFILTER_PASSED','DETERMINISTIC_RANK_RECORDED','FINAL_RULE_CHECK_PASSED'],rejected_coupon_ids:rejectedCoupons,fallback_status:'none',
+  }:rejected(['NO_ELIGIBLE_COUPON'],rejectedCoupons);
+  trace.push({step_id:'coupon-final-decision',stage:'coupon',kind:'validation',title:'确认本次发放方案',description:selected?'核对选中组合的叠加条件、共同适用产品和实际优惠。':'未找到可发放的券组合。',input:{候选方案:options.map(x=>({券:[x.base.coupon_id,x.extra?.coupon_id].filter(Boolean),优惠:x.amount,共同适用产品:x.ids,排除原因:x.reason}))},logic:'从满足叠加、范围和金额约束的方案中选实际优惠最高的一组',output:{decision},status:selected?'passed':'info',reason_code:selected?'FINAL_RULE_CHECK_PASSED':'NO_ELIGIBLE_COUPON'});
+  return {input:{need,profile_snapshot:{profile_snapshot_id:profile.profile_snapshot_id,user_id:profile.user_id,market:profile.market,segment:profile.segment,renewal_due_days:profile.renewal_due_days,coupon_received_30d:profile.coupon_received_30d}},output:decision,decision_summary:['信息检查 → 单券资格 → 券组合确认',`合资格券 ${eligible.length} 张`,decision.decision==='grant'?`最终发放 ${decision.selected_coupon_id}`:'没有可发放的券'],node_logs:[{node:'coupon.hybrid_orchestration',status:'success',summary:`eligible=${eligible.length}; selected=${decision.selected_coupon_id??'none'}`,duration_ms:Date.now()-started}],trace,schema_valid:true,retry_count:0,fallback_status:decision.fallback_status};
 }

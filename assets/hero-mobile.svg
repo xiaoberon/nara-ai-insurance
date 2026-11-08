@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 478 494" fill="#fff" font-family="Microsoft YaHei,Noto Sans CJK SC,PingFang SC,sans-serif"><g transform="translate(0,0)">
+ <rect width="478" height="241" rx="17" fill="#142b40"/>
+ <text x="24" y="35" fill="#9fe1d5" font-size="16" font-weight="700">PoC / 可行性验证</text>
+ <text x="24" y="77" font-size="25" font-weight="700">验证 AI 如何接入保险购买流程</text>
+ <text x="24" y="110" font-size="16">Proof of Concept · 三种决策跑法对照</text>
+ <rect x="24" y="126" width="430" height="27" rx="7" fill="#24465e"/><text x="37" y="145" font-size="15">AI 与规则的决策边界</text><rect x="24" y="160" width="430" height="27" rx="7" fill="#24465e"/><text x="37" y="179" font-size="15">75 次典型场景对照</text><rect x="24" y="194" width="430" height="27" rx="7" fill="#24465e"/><text x="37" y="213" font-size="15">逐阶段展示输入、判断与结果</text>
+ </g><g transform="translate(0,253)">
+ <rect width="478" height="241" rx="17" fill="#773a21"/>
+ <text x="24" y="35" fill="#ffdab9" font-size="16" font-weight="700">FILM / 参赛视频</text>
+ <text x="24" y="77" font-size="25" font-weight="700">用 AI 与关键帧制作参赛视频</text>
+ <text x="24" y="110" font-size="16">Agent / Admin 双端交互与产品叙事</text>
+ <rect x="24" y="126" width="430" height="27" rx="7" fill="#935033"/><text x="37" y="145" font-size="15">Figma × Codex 交互动效</text><rect x="24" y="160" width="430" height="27" rx="7" fill="#935033"/><text x="37" y="179" font-size="15">关键帧理解与人工审核</text><rect x="24" y="194" width="430" height="27" rx="7" fill="#935033"/><text x="37" y="213" font-size="15">录制、剪辑、配音</text>
+ </g></svg>

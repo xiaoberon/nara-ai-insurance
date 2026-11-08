@@ -1,10 +1,11 @@
 # Nara · AI 车险续保助手
 
-**把「怕车泡水、预算别太高」变成一组能比较、能解释的续保选项。**
+马来西亚车险续保｜AI Challenge 团队第一名
 
-马来西亚车险续保｜方案验证原型（PoC）｜AI Challenge 团队第一名
-
-![Nara 项目概览](assets/hero.svg)
+<picture>
+  <source media="(max-width: 680px)" srcset="assets/hero-mobile.svg">
+  <img src="assets/hero.svg" alt="项目包含保险购买 PoC 验证和 AI 协作参赛视频制作">
+</picture>
 
 | 入口 | 打开后可以做什么 |
 | --- | --- |
@@ -14,11 +15,13 @@
 
 Gemini 是 Google 的大语言模型。在线演示中，混合决策（Hybrid）和纯模型对照（LLM Only）由 Nara 的服务器实际请求 Gemini API，使用返回结果完成相应步骤。纯规则（Rules Only）只执行规则。在线原型采用固定虚构案例，模型调用受地区与额度限制。
 
-## 1 · 为什么做车险续保
+## 1 · 为什么做 AI 保险购买助手
 
-> 「雨季快到了，我怕车泡水，预算也别太高。」
+组长已确定马来西亚车险续保为参赛方向。Shopee Insurance 已有车险产品详情页、报价与客服入口，适合验证一件事：能否让用户把续保问题问明白，并带着答案继续选产品和报价。
 
-这句话已经表达了用户的优先级。要做出购买决定，用户还得查明哪些产品适合自己的车、哪些保障包含水浸、哪些券能用，以及使用后的价格。Nara 的切入点是让对话承接这些具体决策，并让用户能顺着答案继续报价。
+我对照了本地竞品录屏与截图。微小保录屏先由产品入口进入对话，再把解释连到推荐卡和详情页（约 00:26–00:45）。蚁小保的「服务」录屏中，用户可以从服务列表进入产品对比，选产品后回到对话看表格（约 00:11–00:32）。Shopee MY 现状录屏则显示，用户从产品页进入客服后仍要按分类逐步找相关信息（约 00:22–00:42）。
+
+从这些可见交互看，**AI 助手的价值是把自然语言接到购买动作上**。用户可以先问自己的问题，系统再把回答整理为保障偏好、价格条件和可比较的候选，并引导到下一步。对 Nara 而言，语言模型用于理解与解读，领券、承保资格和价格仍由规则与原文证据支撑。决策时间、优惠理解和转化是待验证指标。 [蚁小保公开功能介绍](https://jrj.wuhan.gov.cn/ztzl_57/xyrd/bxy/202602/t20260205_2725006.shtml)
 
 ![用户表达、平台决策与运营跟进](assets/opportunity.svg)
 
@@ -38,30 +41,40 @@ Gemini 是 Google 的大语言模型。在线演示中，混合决策（Hybrid�
 
 用「两周后续保、三年车龄、预算 MYR 900、担心水浸」贯穿混合决策的四步：
 
-1. **需求理解 · 把用户原话变成条件。** Gemini 提取车型、车龄、续保时间、预算和保障偏好。系统检查字段与格式是否符合约定，并保留缺失项。格式合法只能说明输出能交给下一阶段，字段是否准确仍需要用案例验收。
-2. **优惠券 · 先判断能不能领，再判断哪张合适。** 规则依次核对市场、用户分群、续保窗口、活动状态、预算、同一用户的领取次数、适用产品和折扣上限。Gemini 在合资格候选中选择，系统再复核券编号和金额。没有合资格候选时拒券，决策记录保留每张券被排除的原因。
-3. **产品推荐 · 先排除买不了的，再解释排序。** 系统按在售状态、市场、车型、车龄和优惠券适用范围过滤。对留下的产品按保障匹配 **60%**、优惠后价格相对预算 **40%** 排序。以水浸案例为例，产品能否进入候选由规则决定，水浸保障和券后价格才参与排名。在本次在线截图中，RoadGuard Flex 通过过滤，水浸保障得 60 分，券后 MYR 710 在 MYR 900 预算内，再得 40 分。
-4. **详情对比 · 只引用对应详情页能支持的信息。** Gemini 从产品详情页抽取保障、保费、免赔额等信息，系统核对原文证据。没有披露的字段标为未说明。同一个免赔额出现不同金额时，标记冲突并交给人工核对。
+1. **需求理解。** Gemini 提取续保时间、车型、预算与保障偏好。系统检查输出格式，并对缺失项给出补问，用户区展示这些信息如何影响接下来的筛选。
+2. **优惠券。** 检查输入是否足够，再按市场、领取次数、活动期、额度和适用产品筛单券。规则检查叠加关系、共同适用产品和折扣上限，按实际金额确定券组合。资深用户可见额外券提示，点击查看或选择示例追问展开同一权益。报价已包含符合条件的额外券。参赛演示保留原来的追问节奏。
+3. **产品推荐。** 先按在售、市场、车型、车龄与券范围过滤，再评分。保障分 = 60 × 匹配关注项 ÷ 关注项。预算分 = 40 × 预算匹配比例，券后价在预算内取 1，超预算时按超出额占预算的比例递减，最低为 0。总分 = 已获分 ÷ 可计算维度的满分 × 100。只给了保障偏好且两项匹配一项时，30／60 换算为 50／100，界面标出缺少预算。两项都缺时显示缺少评分依据。同分优先券后价低的产品，再按编号排序。
+4. **产品对比。** 读取各自详情页、统一字段、核对原文。P005 的免赔额一处写 MYR 450、另一处写 MYR 700，用户区显示「数值冲突 · 待核对」，白盒区同时展示两处证据。原文未披露的字段另作标记。
 
 ### 同一个工作台，两种决策场景
 
-**正常续保 · 两周内到期且关注水浸（C01）。** 展开推荐阶段，可以同时看到条件输入、过滤和排序过程、结构化结果。
+**正常续保 · 两周内到期且关注水浸（C01）。** ① 条件输入 ② 资格检查与分项得分 ③ 结构化结果 ④ 用户侧的推荐与价格。
 
-[![正常续保的原 PoC 工作台截图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-workbench.png)
+[![正常续保 · 两周内到期且关注水浸（C01）关键区域](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-detail.png)
 
-[放大查看推荐判断](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-detail.png)
+<details>
+<summary>在本页展开完整工作台长图</summary>
 
-**异常处理 · 用户已达到领券次数上限（C11）。** 展开优惠券阶段，可以核对领取次数和资格阈值，以及为什么最后没有发券。
+[![正常续保 · 两周内到期且关注水浸（C01）的工作台长图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-workbench.png)
 
-[![频控冲突的原 PoC 工作台截图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-workbench.png)
+</details>
 
-[放大查看频控判断](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-detail.png)
+**异常处理 · 用户已达到领券次数上限（C11）。** ① 条件输入 ② 券资格与拒券原因 ③ 发放结果 ④ 用户能看到的解释。
+
+[![异常处理 · 用户已达到领券次数上限（C11）关键区域](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-detail.png)
+
+<details>
+<summary>在本页展开完整工作台长图</summary>
+
+[![异常处理 · 用户已达到领券次数上限（C11）的工作台长图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-workbench.png)
+
+</details>
 
 ### 同一批案例，三种决策方式
 
 ![三种模式在四阶段及全链上的通过率](assets/evaluation.svg)
 
-五个典型案例在每种模式下各跑五轮，**每种模式 25 次，共 75 次执行**。全链通过要求同一轮四阶段都符合预设标准。
+以下为旧版策略的历史结果。五个典型案例在每种模式下各跑五轮，**每种模式 25 次，共 75 次执行**。全链通过要求同一轮四阶段都符合预设标准。
 
 | 同批指标 | Hybrid 混合决策 | Rules Only 纯规则 | LLM Only 纯模型 |
 | --- | ---: | ---: | ---: |
@@ -70,15 +83,17 @@ Gemini 是 Google 的大语言模型。在线演示中，混合决策（Hybrid�
 | 详情页无来源字段计数 | 0 | 0 | 0 |
 | 平均全链耗时 | 18.46 秒 | 1.56 毫秒 | 21.21 秒 |
 
-违规项次按每轮的「产品 × 违反条件」累计。历史导出记录的模拟回退为 0。纯模型是本项目移除关键规则后的对照，结论适用范围为本批虚构典型案例。 [历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) · [原始评测数据](public/replay/evaluation.json) · [早期 Mock 评测](assets/mock-evaluation.json)
+违规项次按每轮的「产品 × 违反条件」累计。历史 Gemini 批次没有记录模型步骤被模拟结果替代。回放页还提供 20 个案例的 300 次早期模拟评测。新版公开重跑待持久任务与独立配额接通。纯模型是本项目移除关键规则后的对照，结论适用范围为本批虚构典型案例。 [历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) · [原始评测数据](public/replay/evaluation.json) · [早期 Mock 评测](assets/mock-evaluation.json)
 
 | 场景 | 期望行为 | 历史观察 |
 | --- | --- | --- |
 | 两周内续保，关注水浸（C01） | 理解口语中的续保意图与水浸需求 | Hybrid 全链 5/5，纯规则需求理解 0/5 |
 | 没说车型、车龄和预算（C07） | 标出缺失字段，并拦住不满足条件的发券 | Hybrid 发券 2/5。保存的样例识别了信息不足，仍发放续保券 |
 | 7 年 SUV 月底续保，已达到领券次数上限（C11） | 读出车龄，并拒绝不合资格的券 | Hybrid 全链 5/5。纯规则漏读车龄，纯模型发券 0/5 |
-| 同一产品详情页给出冲突的免赔额（C12） | 标记冲突并提示人工核对，保留未提供的车龄 | Hybrid 详情对比 5/5、需求理解 4/5。纯模型详情对比 0/5 |
+| 同一产品详情页给出冲突的免赔额（C12） | 标记冲突并提示人工核对，保留未提供的车龄 | Hybrid 对比 5/5；需求理解有一轮没有按预期把车龄标为缺失。纯模型详情对比 0/5 |
 | 11 年车龄 SUV 仍有少量可选产品（C16） | 过滤不适用产品，同时保留适用产品 | Hybrid 和纯规则全链均 5/5，纯模型推荐 0/5 |
+
+C12 的历史导出保存了首轮成功样例和汇总差异，未保存失败轮的完整响应，因此无法确定该轮实际输出了什么。
 
 这里的 **0/5** 指该模式在该案例、该阶段五轮均未通过。跨案例看，有三个可定位的问题：
 
@@ -94,12 +109,13 @@ Gemini 是 Google 的大语言模型。在线演示中，混合决策（Hybrid�
 
 [打开 Figma 项目](https://www.figma.com/design/qDrQZjREMHG7DOBcmahceX/nara_shopee?node-id=0-1)
 
-### 镜头一 · 从首页入口到助手开场
+### 镜头一 · 开场动画衔接 Nara 首页
 
-| 原始静态状态 | Figma 关键帧 | 成片 |
-| --- | --- | --- |
-| ![首页入口静态参考](assets/starting-ui.svg) | ![助手面板打开关键帧](assets/figma-keyframe.svg) | ![成片中的入口与助手](assets/film-entry.svg)<br>![成片中的助手开场与授权](assets/film-consent.svg) |
-| 确认助手入口和手机界面的落点 | 约半秒背景淡出，面板出现并流式显示开场白 | 视线从首页入口转到开场与授权 |
+左侧保留 Nara 首页的静态参考。右侧四帧按正式成片顺序，从 Nara 标识出现、周围功能图标展开，到首页落位、打开助手。原始开场分镜说明将 Nara 元素的最终位置对齐到首页右下角入口。下面的时间点均取自正式成片。
+
+| 首页静态参考 | 正式成片中的开场关键帧 |
+| --- | --- |
+| ![Nara 首页静态参考](assets/starting-ui.svg) | [![00:26 标识出现](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-1.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-1.jpg)<br>[![00:34 功能图标展开](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-2.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-2.jpg)<br>[![00:42 衔接首页](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-3.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-3.jpg)<br>[![00:50 助手打开](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-4.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-4.jpg) |
 
 [打开助手开场关键帧](https://www.figma.com/design/qDrQZjREMHG7DOBcmahceX/nara_shopee?node-id=26-5)
 
@@ -107,10 +123,17 @@ Gemini 是 Google 的大语言模型。在线演示中，混合决策（Hybrid�
 
 | 交互状态 | 原 Figma 帧 | 成片画面 |
 | --- | --- | --- |
-| **问优惠。** 用户在收到推荐后想确认还有哪些权益 | [![Figma 原帧 1](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-1.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-1.png) | [![02:41 · 解释现有权益](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-1.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-1.png)<br>02:41 · 解释现有权益 |
-| **展示可用券。** 在常规权益之后展示专属券和下一步操作 | [![Figma 原帧 2](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-2.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-2.png) | [![02:54 · 券卡片](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-2.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-2.png)<br>02:54 · 券卡片 |
-| **进入报价。** 用券后回到产品详情页和报价表单，沿用前面收集的车辆上下文 | [![Figma 原帧 3](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-3.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-3.png) | [![03:19 · 报价表单](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-3.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-3.png)<br>03:19 · 报价表单 |
-| **比较产品。** 用户在选择页提出新问题，Nara 将候选产品转换成便于阅读的差异 | [![Figma 原帧 4](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-4.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-4.png) | [![03:48 · 比较结果](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-4.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-4.png)<br>03:48 · 比较结果 |
+| **问优惠。** 用户在收到推荐后想确认还有哪些权益 | [![Figma 原帧 1](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-1.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-1.png) | [![01:50 · 解释现有权益](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-1.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-1.png)<br>01:50 · 解释现有权益 |
+| **展示可用券。** 在常规权益之后展示专属券和下一步操作 | [![Figma 原帧 2](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-2.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-2.png) | [![01:58 · 券卡片](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-2.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-2.png)<br>01:58 · 券卡片 |
+| **进入报价。** 用券后回到产品详情页和报价表单，沿用前面收集的车辆上下文 | [![Figma 原帧 3](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-3.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-3.png) | [![02:30 · 报价表单](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-3.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-3.png)<br>02:30 · 报价表单 |
+| **比较产品。** 用户在选择页提出新问题，Nara 将候选产品转换成便于阅读的差异 | [![Figma 原帧 4](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-4.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-figma-4.png) | [![02:58 · 对比表展开](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-4.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/interaction-film-4.png)<br>02:58 · 对比表展开 |
+
+<details>
+<summary>查看成片中展开的产品对比明细</summary>
+
+[![展开的逐项产品对比](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/comparison-table-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/comparison-table-detail.png)
+
+</details>
 
 该组镜头中的权益和金额属于参赛演示脚本。用户退出后的跟进由 Admin 章节接续。 [参赛成片](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink) · [备用播放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/)
 

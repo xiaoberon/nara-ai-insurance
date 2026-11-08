@@ -22,8 +22,8 @@ export async function runPublic(caseId: string, mode: DecisionMode): Promise<{mo
   if (!response.ok) throw new Error(errors[data.error] ?? '暂时无法运行，请重试或查看历史评测。');
   return data;
 }
-export async function getReplay() {
-  const response = await fetch('/replay/evaluation.json');
+export async function getReplay(size:75|300=75) {
+  const response = await fetch(size===75?'/replay/evaluation.json':'/replay/evaluation-300.json');
   if (!response.ok) throw new Error('历史评测暂时无法载入，请刷新重试。');
   return response.json();
 }

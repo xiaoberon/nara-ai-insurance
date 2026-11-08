@@ -17,14 +17,29 @@ describe('Coupon stage',()=>{
     expect(result.trace.find((x)=>x.step_id==='coupon-CPN-RENEW-50')?.output).toMatchObject({eligible:true});
   });
 
-  it('lets Hybrid LLM see only rule-eligible vouchers',async()=>{
+  it('chooses eligible Hybrid offers without asking the model to rank them',async()=>{
     const seen:string[][]=[];
     const provider=new MockLLMProvider();
     const choose=provider.chooseCoupon.bind(provider);
     provider.chooseCoupon=async(userNeed,profile,candidates)=>{seen.push(candidates.map((x)=>x.coupon_id));return choose(userNeed,profile,candidates);};
     const result=await runCoupon(await need(),users[0],coupons,products,'hybrid',provider);
-    expect(seen).toEqual([['CPN-RENEW-50']]);
-    expect(result.trace.find((x)=>x.step_id==='coupon-llm-rank')?.input).toMatchObject({eligible_batches:['CPN-RENEW-50']});
+    expect(seen).toEqual([]);
+    expect(result.output?.selected_coupon_id).toBe('CPN-RENEW-50');
+  });
+
+  it('applies the eligible extra offer once and restricts the combined product scope',async()=>{
+    const profile=users.find(user=>user.user_id==='U1007')!;
+    const result=await runCoupon(await need(),profile,coupons,products,'hybrid',llm);
+    expect(result.output).toMatchObject({discount_value:65,eligible_product_ids:['P008']});
+    expect(result.output?.applied_coupons?.map(item=>item.coupon_id)).toEqual(['CPN-RENEW-50','CPN-MEMBER-15']);
+    const capped=await runCoupon(await need(),profile,coupons.map(c=>c.extra_for_established_user?{...c,combined_discount_cap:60}:c),products,'hybrid',llm);
+    expect(capped.output?.discount_value).toBe(50);
+  });
+
+  it('blocks an unknown vehicle even when the model uses an unexpected missing-field alias',async()=>{
+    const parsed=await need();
+    const result=await runCoupon({...parsed,vehicle:{...parsed.vehicle,type:'unknown'},missing_fields:['carModel']},users[0],coupons,products,'hybrid',llm);
+    expect(result.output?.reason_codes).toContain('HIGH_RISK_COUPON_BLOCKED');
   });
 
   it('blocks frequency-limited users despite LLM suggestion',async()=>{

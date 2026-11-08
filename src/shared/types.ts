@@ -22,6 +22,8 @@ export interface UserProfile {
   renewal_due_days: number;
   current_policy_tier: string;
   historical_purchase_count: number;
+  platform_tenure_months?: number;
+  active_membership?: boolean;
   price_sensitivity: string;
   preferred_channel: string;
   coupon_received_30d: number;
@@ -96,6 +98,9 @@ export interface Coupon {
   eligible_product_ids: string[];
   per_user_limit_30d: number;
   stackable: boolean;
+  extra_for_established_user?: boolean;
+  stack_with_coupon_id?: string;
+  combined_discount_cap?: number;
   budget_remaining: number;
   valid_from: string;
   valid_to: string;
@@ -128,6 +133,7 @@ export interface UserVoucher {
 export interface CouponDecision {
   decision: 'grant' | 'reject' | 'review';
   selected_coupon_id: string | null;
+  applied_coupons?: Array<{coupon_id:string;name:string;amount:number;tier:"standard"|"extra"}>;
   discount_value: number;
   currency: 'MYR';
   eligible_product_ids: string[];
