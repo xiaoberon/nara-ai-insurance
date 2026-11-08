@@ -55,13 +55,15 @@
 
 起点是一批静态页面和可跳转热区。它们能表达页面结构，但入口如何吸引注意、助手怎样开始说话、用户何时授权，都需要用时间和视觉焦点来讲。重绘整套 UI 的成本过高，当时的 Figma 账户条件也限制了把现有 HTML 转为可编辑组件。
 
-![Agent 各阶段交接参考总览，来自原交接包](assets/agent-sections.svg)
+![Admin 转场 Figma Section，来自原交接包](assets/figma-section.svg)
+
+[查看 Agent 各阶段交接参考总览](assets/agent-sections.svg)
 
 ### 镜头示例 · 从首页入口到助手开场
 
 | 原始静态状态 | Figma 关键帧 | 成片 |
 | --- | --- | --- |
-| ![原交接包的首页入口静态参考](assets/starting-ui.svg) | ![Figma 助手面板打开关键帧](assets/figma-keyframe.svg) | ![成片中的助手与授权镜头](assets/film-consent.svg) |
+| ![原交接包的首页入口静态参考](assets/starting-ui.svg) | ![Figma 助手面板打开关键帧](assets/figma-keyframe.svg) | ![成片中的首页入口镜头](assets/film-entry.svg)<br>![成片中的助手与授权镜头](assets/film-consent.svg) |
 | 确定助手入口位置与手机界面 | 标明聚焦背景约半秒淡出、聊天面板出现、第一句流式输出 | 让画面的注意力跟随入口、开场白与授权请求 |
 
 我将镜头拆成状态、触发条件与动效时序，用 Figma 关键帧和说明让 Codex 先复述，再在网页中实现。我按画面位置和节奏逐段核对，最后录制、剪辑并配音。成片把用户侧续保咨询与 Admin 侧的线索分层及跟进连成一个故事。

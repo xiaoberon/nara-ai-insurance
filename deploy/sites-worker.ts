@@ -20,12 +20,13 @@ export default {
   async fetch(request: Request & { cf?: { country?: string } }, env: Environment): Promise<Response> {
     const { pathname } = new URL(request.url);
     const model = env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+    const country = request.cf?.country ?? request.headers.get('CF-IPCountry') ?? 'XX';
     if (request.method === 'GET') {
       if (pathname === '/' || pathname === '/live') return Response.redirect(new URL('/live/', request.url));
       if (pathname === '/live/') return staticFile(page, 'text/html');
       if (pathname === '/showcase.css') return staticFile(css, 'text/css');
       if (pathname === '/live/live.js') return staticFile(js, 'application/javascript');
-      if (pathname === '/live/api/cases') return json({ model, cases: cases.map(({id, name, message}) => ({ id, name, message })) });
+      if (pathname === '/live/api/cases') return json({ model, region: country, cases: cases.map(({id, name, message}) => ({ id, name, message })) });
     }
     if (pathname !== '/live/api/run' || request.method !== 'POST') return error('NOT_FOUND', 404);
     if (request.headers.get('origin') !== new URL(request.url).origin ||
@@ -39,7 +40,7 @@ export default {
     const mode = body.mode;
     if (mode === 'rules_only') return json({ model: null, modelCalls: 0, result: await runFull({ case: item, mode }) });
     const countries = (env.NARA_ALLOWED_COUNTRIES ?? '').split(',');
-    if (!countries.includes(request.cf?.country ?? 'XX')) return error('REGION_UNAVAILABLE', 403);
+    if (!countries.includes(country)) return error('REGION_UNAVAILABLE', 403);
     if (!env.GEMINI_API_KEY || !env.DB) return error('GEMINI_UNAVAILABLE', 503);
     const now = Date.now();
     const day = new Date(now).toISOString().slice(0, 10);

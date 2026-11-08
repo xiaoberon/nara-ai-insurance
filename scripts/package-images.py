@@ -4,7 +4,7 @@ from pathlib import Path
 from PIL import Image
 
 assets = Path('assets')
-for name in ['c01', 'pdp-conflict', 'agent-sections', 'starting-ui', 'figma-keyframe', 'film-consent']:
+for name in ['c01', 'pdp-conflict', 'agent-sections', 'starting-ui', 'figma-keyframe', 'film-consent', 'film-entry', 'figma-section']:
     paths = [assets / (name + '.' + suffix) for suffix in ('png', 'jpg')]
     with Image.open(next(path for path in paths if path.exists())) as src:
         src.thumbnail((1100, 740))
