@@ -7,12 +7,12 @@ import { runCoupon } from './couponEngine';
 import { runRecommendation } from './productMatcher';
 import { runComparison } from './comparisonExtractor';
 
-const llm=llmProvider;
+
 const emptyStage=<T>(name:string,error:string):StageResult<T>=>({input:null,output:null,decision_summary:[`${name} 未运行：${error}`],node_logs:[{node:name,status:'failed',summary:error,duration_ms:0}],trace:[{step_id:`${name}-blocked`,stage:name as 'coupon'|'recommendation'|'comparison',kind:'fallback',title:`${name} 被上游阻断`,description:'上游没有产生可用且经过校验的输出。',input:{error},logic:'upstream_invalid → do_not_run',output:{blocked:true},status:'failed',reason_code:error}],schema_valid:false,retry_count:0,fallback_status:'blocked',error});
 
 export interface FullRunInput { case:TestCase; mode:DecisionMode; message?:string; profile_id?:string; selected_product_ids?:string[]; persist?:boolean }
 
-export async function runFull(input:FullRunInput):Promise<FullRunResult>{
+export async function runFull(input:FullRunInput,llm=llmProvider):Promise<FullRunResult>{
   const started=Date.now();
   const usageBefore=llm.usageSnapshot?.();
   const runId=crypto.randomUUID();

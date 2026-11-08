@@ -1,85 +1,93 @@
-# Nara AI Insurance PoC
+# Nara · AI 车险续保助手
 
-> 在线体验：[nara-ai-insurance-poc.tangyiris.chatgpt.site](https://nara-ai-insurance-poc.tangyiris.chatgpt.site)
+**把一句续保咨询，变成可以逐步检查的保险决策。**
 
-Nara 是一个基于虚构数据的保险助手项目，来自内部 AI Challenge（第一名）。本仓库同时保留两类互补产出：一类用于验证决策方案是否可行，另一类用于完整呈现面向业务的 AI 产品体验。
+马来西亚车险续保｜真实 Gemini 对照评测｜AI Challenge 团队第一名
 
-## 两类项目产出
+![Nara 项目概览，从车险咨询到可核查决策](assets/hero.svg)
 
-| 产出 | 目的 | 查看方式 |
-| --- | --- | --- |
-| **PoC 可行性验证** | 验证 LLM 与规则引擎的混合决策方式，并对比三种运行模式 | [在线交互 Demo](https://nara-ai-insurance-poc.tangyiris.chatgpt.site) / 本仓库源码 |
-| **AI Demo 参赛作品** | 展示从用户需求理解、推荐、在线投保到流失识别与后台跟进的 Agent/Admin 业务闭环 | [最终参赛视频](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink) / [Figma 关键帧](https://www.figma.com/design/qDrQZjREMHG7DOBcmahceX/nara_shopee?node-id=0-1&t=gdx1QpTnOgnOZEsX-1) |
+[实时 Gemini](https://nara-gemini-live.xiaoxh.chatgpt.site/live/) · [历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) · [参赛成片](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/)
 
-## PoC 可行性验证
+## 1 · AI Challenge 背景
 
-PoC 验证了从用户咨询、优惠券决策、产品推荐到产品比较的四阶段决策流程。
+> “雨季快到了，我怕车泡水，预算也别太高。”
 
-### 项目展示什么
+续保时，用户关心的是风险与价格。平台需要把这些表达转换为可以执行的条件，比如水浸保障、预算、车型和车龄，再核对可用优惠与产品适用范围。优惠券资格和保障条款都有明确约束，模型适合提取语言里的意图和字段，规则负责校验可执行的决定。
 
-- 混合决策思路：LLM 可负责语义理解，资格、合规、定价和来源校验等高风险环节保留确定性规则。
-- 三种可对照模式：`Hybrid`、`Rules Only` 与 `LLM Only`。
-- 每阶段均提供可追溯信息：结构化字段、规则校验、决策原因、来源证据及人工核对标记。
-- 固定测试集覆盖正常咨询、信息缺失、优惠券频控、PDP 字段冲突和产品硬过滤等情况。
+![车险续保的业务机会，连接用户需求、平台约束和运营跟进](assets/opportunity.svg)
 
-公开网页仅使用虚构和脱敏数据，当前为 **Public Mock Demo**：不暴露 API Key、不产生付费模型调用，也不保留访问者输入。项目通过 `LLMProvider` 预留了服务端接入真实模型的接口；本仓库默认使用确定性的 Mock 实现。
+团队用 **Agent / Admin** 双端展示从需求理解、推荐和投保引导，到流失识别及跟进的产品设想。我负责将续保问题拆成可验证的决策步骤，搭建虚构测试数据与规则，设计对照评测，并负责产品故事重构、分镜动效、录制、剪辑和配音。PoC 使用虚构业务数据，真实调用 Gemini。参赛视频里的交易和转化状态属于演示。
 
-### 四阶段流程
+## 2 · PoC 验证
 
-1. **Chat**：将自然语言需求整理为 `UserNeed` 结构，并识别缺失信息。
-2. **Voucher**：依次校验市场、用户分群、续保窗口、预算、频控、适用范围和折扣规则，再选择可用券。
-3. **Recommendation**：先进行产品硬过滤，再按保障匹配度（60%）与用券后价格相对预算（40%）排序。
-4. **Comparison**：仅从虚构 PDP 的可见内容中提取字段；没有证据的字段不补全，存在冲突时转人工核对。
+![对话解析、优惠券、产品推荐、产品详情对比四阶段](assets/flow.svg)
 
-### 三种模式的意义
-
-同一批案例会在三种模式下运行，用于观察不同方案的边界：
-
-| 模式 | 决策方式 |
+| 阶段 | Hybrid 怎么做 |
 | --- | --- |
-| `Hybrid` | 使用语义理解，并在高风险决策处加入可审计的规则门禁 |
-| `Rules Only` | 全流程依赖确定性规则与模式匹配 |
-| `LLM Only` | 以模型输出为主，不具备相同的下游硬规则和来源校验门禁 |
+| 需求理解 | Gemini 抽取用户意图、预算、车型、车龄和缺失项，由 Schema 校验输出 |
+| 优惠券 | 规则校验资格和频控，Gemini 在合资格候选中排序，规则复核券和金额 |
+| 产品推荐 | 过滤不适用产品，以保障匹配 60% 和优惠后价格相对预算 40% 排序 |
+| 详情对比 | Gemini 从产品详情页抽取信息，规则核对来源证据与冲突，必要时标记人工核对 |
 
-本项目不试图证明某种模型在所有场景都更好，而是验证 LLM 适合承担哪些工作，以及哪些环节需要保留可控的产品规则。
+| 正常续保 · C01 | 异常处理 · PDP 字段冲突 |
+| --- | --- |
+| ![C01 Rules Only 运行结果与决策记录](assets/c01.svg) | ![本地 PoC 的 PDP 冲突检查](assets/pdp-conflict.svg) |
+| C01 规则模式的界面样例。关注券资格如何进入推荐，结果可逐阶段展开 | 同一详情页出现两个免赔额，界面显示冲突及人工核对 |
 
-### 本地运行
+### 同一批案例，三种决策方式
+
+**Hybrid** 在语义任务中用模型，并在关键环节加入规则。**Rules Only** 使用确定性规则。**LLM Only** 作为对照，移除关键业务规则与证据门禁。
+
+![历史 Gemini 评测的三种模式、四阶段及全链通过率](assets/evaluation.svg)
+
+| 同批评测指标 | Hybrid | Rules Only | LLM Only |
+| --- | ---: | ---: | ---: |
+| 全链通过 | 21/25 | 15/25 | 0/25 |
+| 推荐硬条件违规项次 | 0 | 0 | 201 |
+| PDP 无来源字段计数 | 0 | 0 | 0 |
+| 平均全链耗时 | 18.46 秒 | 1.56 毫秒 | 21.21 秒 |
+
+五个典型案例各重复五轮，每种模式 25 次，共 75 次执行。全链通过指同一轮四个阶段均符合预设标准。推荐违规按产品与违反条件的组合逐次累计。结果用于判断这套实现的行为，适用范围为本批虚构案例。历史导出记录的 Mock 回退运行数为 0。 [历史 Gemini 导出](public/replay/evaluation.json) · [早期 Mock 全量导出](assets/mock-evaluation.json)
+
+> **C07｜识别了缺失信息，发券门禁仍然放行。** Hybrid 的发券阶段在五轮中通过两轮。历史样例识别出车型、车龄和预算缺失，实际字段名是 `vehicle_type`、`vehicle_age_years`、`budget`。预期是拒券并返回 `HIGH_RISK_COUPON_BLOCKED`，样例却发放 `CPN-RENEW-50`。代码核对发现门禁匹配规范字段路径，别名会漏过拦截。下一轮应统一字段路径，并用跨阶段测试验证缺失信息一定会触发预期门禁。
+
+## 3 · 参赛视频制作
+
+起点是一批静态页面和可跳转热区。它们能表达页面结构，但入口如何吸引注意、助手怎样开始说话、用户何时授权，都需要用时间和视觉焦点来讲。重绘整套 UI 的成本过高，当时的 Figma 账户条件也限制了把现有 HTML 转为可编辑组件。
+
+![Agent 各阶段交接参考总览，来自原交接包](assets/agent-sections.svg)
+
+### 镜头示例 · 从首页入口到助手开场
+
+| 原始静态状态 | Figma 关键帧 | 成片 |
+| --- | --- | --- |
+| ![原交接包的首页入口静态参考](assets/starting-ui.svg) | ![Figma 助手面板打开关键帧](assets/figma-keyframe.svg) | ![成片中的助手与授权镜头](assets/film-consent.svg) |
+| 确定助手入口位置与手机界面 | 标明聚焦背景约半秒淡出、聊天面板出现、第一句流式输出 | 让画面的注意力跟随入口、开场白与授权请求 |
+
+我将镜头拆成状态、触发条件与动效时序，用 Figma 关键帧和说明让 Codex 先复述，再在网页中实现。我按画面位置和节奏逐段核对，最后录制、剪辑并配音。成片把用户侧续保咨询与 Admin 侧的线索分层及跟进连成一个故事。
+
+[打开完整参赛视频](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/) · [查看 Figma 关键帧](https://www.figma.com/design/qDrQZjREMHG7DOBcmahceX/nara_shopee?node-id=26-5)
+
+## 4 · 总结与复盘
+
+| 我的决策 | 看到的证据 | 下一轮 |
+| --- | --- | --- |
+| 让模型处理语义，把资格和来源校验留给规则 | 典型集中 Hybrid 全链通过 21/25，推荐硬条件违规 0 项次 | 扩充边界案例，分开追踪理解错误、规则漏判和上游故障 |
+| 将每个节点的输出和理由纳入评测 | C07 能定位到缺失字段如何跨阶段影响发券 | 将字段路径校验和拒券条件纳入跨阶段回归 |
+| 用关键帧、动效说明与可运行网页完成演示 | 同一份成片串联了 Agent 与 Admin，团队获 AI Challenge 第一名 | 将镜头验收标准沉淀成可复用的分镜模板 |
+
+### 实时体验与本地运行
+
+打开 [实时体验](https://nara-gemini-live.xiaoxh.chatgpt.site/live/) 选择固定案例。Hybrid 与 LLM Only 使用服务端 Gemini，Rules Only 不调用模型。实时模型有地区、并发和每日用量限制。
 
 ```bash
-npm install
-npm run dev
-```
-
-打开 `http://127.0.0.1:5173`。
-
-```bash
-npm test
+npm ci
 npm run build
+npm run showcase
 ```
 
-当前包含 28 项单元与端到端检查。
+打开 `http://127.0.0.1:3002/`。本地运行 Gemini 需在服务端环境提供 `GEMINI_API_KEY`，可通过 `GEMINI_MODEL` 指定型号。公开部署配置见 [部署说明](deploy/README.md)。原 PoC 开发工作台仍可通过 `npm run dev` 使用。
 
-### 数据与边界
+### 历史评测回放
 
-- 用户、车辆、优惠券、产品和 PDP 页面均为虚构数据。
-- 不包含 Shopee、保险公司、客户、保单、支付或核保的真实数据。
-- `.env` 已排除在版本控制之外，请勿提交模型 Key。
-- 这是可行性验证原型，不是生产环境的保险服务。
-
-### 目录说明
-
-```text
-src/client/       React 交互式验证界面
-src/server/data/  虚构数据、测试案例和预期结果
-src/server/llm/   Provider 接口与确定性 Mock 实现
-src/server/services/
-                  Chat、优惠券、推荐、比较和评估逻辑
-tests/            单元与端到端验证
-```
-
-## AI Demo 参赛作品
-
-这部分回答的是“AI 如何在完整业务流程中影响用户体验和转化”。用户侧 Agent 负责需求理解、推荐和投保引导；后台 Admin 聚合对话进度与流失信号，支持后续触达。
-
-制作过程以 [Figma 关键帧](https://www.figma.com/design/qDrQZjREMHG7DOBcmahceX/nara_shopee?node-id=0-1&t=gdx1QpTnOgnOZEsX-1) 与动效说明为输入，由 Codex 协助实现可演示网页，经人工校验、录制和剪辑后形成 [最终参赛成片](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink)。
-
+[历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) 可以逐案例、逐模式查看预期、实际摘要和判分差异。回放也可将 `public/` 独立部署到静态托管，入口为 `/replay/`，无需后端或模型配置。

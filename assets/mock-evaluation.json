@@ -1,0 +1,5116 @@
+{
+  "generated_at": "2026-08-24T16:42:13.685Z",
+  "scope": "all",
+  "repeats_per_case": 5,
+  "test_case_count": 20,
+  "profile_count": 9,
+  "execution_count": 300,
+  "note": "结果由本次运行的实际输出逐项对照可见标准答案计算，不预填模式优劣；no superiority values are prefilled.",
+  "metric_definition": {
+    "chat": "意图、信息状态及案例关键字段全部符合即通过",
+    "voucher": "发/拒结论、券ID及关键拒绝原因符合即通过",
+    "recommendation": "首位产品落在可接受集合且无硬条件违规即通过",
+    "comparison": "关键PDP字段、冲突与人工核对状态符合即通过",
+    "full_chain": "同一次运行四阶段全部通过",
+    "safety_red_lines": [
+      "推荐硬条件违规数",
+      "PDP无来源字段数"
+    ]
+  },
+  "modes": [
+    {
+      "mode": "hybrid",
+      "runs": 100,
+      "chat_pass_rate": 0.8,
+      "voucher_pass_rate": 1,
+      "recommendation_pass_rate": 1,
+      "comparison_pass_rate": 0.85,
+      "full_chain_pass_rate": 0.7,
+      "hard_condition_violations": 0,
+      "ungrounded_pdp_fields": 0,
+      "repeat_consistency": 1,
+      "schema_pass_rate": 1,
+      "average_latency_ms": 1.27,
+      "input_tokens": 47685,
+      "output_tokens": 92580,
+      "estimated_cost_usd": 0
+    },
+    {
+      "mode": "rules_only",
+      "runs": 100,
+      "chat_pass_rate": 0.4,
+      "voucher_pass_rate": 0.9,
+      "recommendation_pass_rate": 0.95,
+      "comparison_pass_rate": 0.55,
+      "full_chain_pass_rate": 0.15,
+      "hard_condition_violations": 0,
+      "ungrounded_pdp_fields": 0,
+      "repeat_consistency": 1,
+      "schema_pass_rate": 1,
+      "average_latency_ms": 0.73,
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "estimated_cost_usd": 0
+    },
+    {
+      "mode": "llm_only",
+      "runs": 100,
+      "chat_pass_rate": 0.8,
+      "voucher_pass_rate": 0.05,
+      "recommendation_pass_rate": 0,
+      "comparison_pass_rate": 0.75,
+      "full_chain_pass_rate": 0,
+      "hard_condition_violations": 1005,
+      "ungrounded_pdp_fields": 0,
+      "repeat_consistency": 1,
+      "schema_pass_rate": 1,
+      "average_latency_ms": 0.54,
+      "input_tokens": 47685,
+      "output_tokens": 104490,
+      "estimated_cost_usd": 0
+    }
+  ],
+  "case_results": [
+    {
+      "case_id": "C01",
+      "case_name": "两周内续保，关注水浸",
+      "profile_id": "U1001",
+      "typical": true,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 3,
+          "max_annual_premium": 900,
+          "must_include_coverage": [
+            "flood"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "flood"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P001.annual_premium": 820,
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 3
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "Chat意图：预期 renew_car_insurance，实际 unknown",
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "unknown",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 3
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 3
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C02",
+      "case_name": "SUV长途驾驶",
+      "profile_id": "U1002",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "SUV",
+          "vehicle_age_years": 7,
+          "max_annual_premium": 1000,
+          "must_include_coverage": [
+            "theft",
+            "roadside"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "FREQUENCY_LIMIT_REACHED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "roadside"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P001.roadside_assistance": "included",
+            "P003.annual_premium": 1080
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 7
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1000
+              },
+              "coverage_priorities": [
+                "theft",
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P006"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 7，实际 null"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1000
+              },
+              "coverage_priorities": [
+                "theft",
+                "roadside_assistance"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P006"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 FREQUENCY_LIMIT_REACHED",
+            "P001 违反 1 项硬条件",
+            "P002 违反 2 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P007 违反 2 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 7
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1000
+              },
+              "coverage_priorities": [
+                "theft",
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C03",
+      "case_name": "价格优先通勤",
+      "profile_id": "U1001",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 2,
+          "max_annual_premium": 700,
+          "must_include_coverage": [
+            "third_party"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P002"
+          ],
+          "must_cover": [
+            "third_party"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P002.annual_premium": 690,
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 2
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 700
+              },
+              "coverage_priorities": [
+                "third_party"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P002",
+                "P008",
+                "P001"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 2
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 700
+              },
+              "coverage_priorities": [
+                "third_party"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P002",
+                "P008",
+                "P001"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "推荐首位：可接受 P002，实际 P001",
+            "首位产品优惠后 720 超过预算 700",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 2
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 700
+              },
+              "coverage_priorities": [
+                "third_party"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C04",
+      "case_name": "完整高保障需求",
+      "profile_id": "U1001",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "SUV",
+          "vehicle_age_years": 8,
+          "max_annual_premium": 1200,
+          "must_include_coverage": [
+            "flood",
+            "fire",
+            "theft",
+            "personal_accident"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P005",
+            "P008"
+          ],
+          "must_cover": [
+            "flood"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P003.annual_premium": 1080,
+            "P003.flood": "covered"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 8
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1200
+              },
+              "coverage_priorities": [
+                "flood",
+                "theft",
+                "fire",
+                "personal_accident"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 8，实际 null",
+            "需求遗漏保障：personal_accident"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1200
+              },
+              "coverage_priorities": [
+                "flood",
+                "theft",
+                "fire"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 8
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1200
+              },
+              "coverage_priorities": [
+                "flood",
+                "theft",
+                "fire",
+                "personal_accident"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C05",
+      "case_name": "口语化雨季需求",
+      "profile_id": "U1001",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "needs_clarification",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 3,
+          "must_include_coverage": [
+            "flood"
+          ],
+          "must_report_missing": [
+            "budget.max_annual_premium"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "flood"
+          ]
+        },
+        "comparison": {
+          "assertions": {
+            "P001.flood": "covered",
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "车龄：预期 3，实际 null"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "Chat意图：预期 renew_car_insurance，实际 unknown",
+            "车龄：预期 3，实际 null",
+            "需求遗漏保障：flood",
+            "推荐首位：可接受 P001/P008，实际 P002",
+            "首位产品 P002 未覆盖 flood",
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "unknown",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P002",
+                "P008",
+                "P001"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "车龄：预期 3，实际 null",
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C06",
+      "case_name": "隐含道路救援",
+      "profile_id": "U1002",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "SUV",
+          "vehicle_age_years": 7,
+          "max_annual_premium": 1000,
+          "must_include_coverage": [
+            "roadside"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "FREQUENCY_LIMIT_REACHED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "roadside"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P001.roadside_assistance": "included",
+            "P003.annual_premium": 1080
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 7，实际 null",
+            "预算：预期 1000，实际 null"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P006"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "Chat意图：预期 renew_car_insurance，实际 unknown",
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 7，实际 null",
+            "预算：预期 1000，实际 null",
+            "需求遗漏保障：roadside"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "unknown",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 7，实际 null",
+            "预算：预期 1000，实际 null",
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 FREQUENCY_LIMIT_REACHED",
+            "P001 违反 1 项硬条件",
+            "P002 违反 2 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P007 违反 2 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C07",
+      "case_name": "缺少车辆与预算",
+      "profile_id": "U1001",
+      "typical": true,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "needs_clarification",
+          "must_report_missing": [
+            "vehicle.type",
+            "vehicle.age_years",
+            "budget.max_annual_premium"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "HIGH_RISK_COUPON_BLOCKED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P002",
+            "P007",
+            "P008"
+          ]
+        },
+        "comparison": {
+          "assertions": {
+            "P001.annual_premium": 820,
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.type",
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "UPSTREAM_FIELDS_INCOMPLETE",
+                "HIGH_RISK_COUPON_BLOCKED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.type",
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "UPSTREAM_FIELDS_INCOMPLETE",
+                "HIGH_RISK_COUPON_BLOCKED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 HIGH_RISK_COUPON_BLOCKED",
+            "推荐首位：可接受 P002/P007/P008，实际 P001",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.type",
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C08",
+      "case_name": "自相矛盾预算",
+      "profile_id": "U1001",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "needs_clarification",
+          "vehicle_type": "Sedan",
+          "must_include_coverage": [
+            "flood"
+          ],
+          "must_report_missing": [
+            "vehicle.age_years",
+            "budget.max_annual_premium"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "HIGH_RISK_COUPON_BLOCKED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "flood"
+          ]
+        },
+        "comparison": {
+          "assertions": {
+            "P001.flood": "covered",
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium",
+                "budget.conflict_requires_confirmation"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "UPSTREAM_FIELDS_INCOMPLETE",
+                "HIGH_RISK_COUPON_BLOCKED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 HIGH_RISK_COUPON_BLOCKED",
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 HIGH_RISK_COUPON_BLOCKED",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years",
+                "budget.max_annual_premium",
+                "budget.conflict_requires_confirmation"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C09",
+      "case_name": "市场不符合",
+      "profile_id": "U1003",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "needs_clarification",
+          "vehicle_type": "Sedan",
+          "max_annual_premium": 900,
+          "must_report_missing": [
+            "vehicle.age_years"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "MARKET_NOT_ELIGIBLE"
+        },
+        "recommendation": {
+          "acceptable_top1": []
+        },
+        "comparison": {
+          "assertions": {
+            "P001.annual_premium": 820,
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": []
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": []
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 MARKET_NOT_ELIGIBLE",
+            "该场景应无可推荐产品，实际首位 P001",
+            "P001 违反 2 项硬条件",
+            "P002 违反 2 项硬条件",
+            "P003 违反 1 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 2 项硬条件",
+            "P006 违反 2 项硬条件",
+            "P007 违反 2 项硬条件",
+            "P008 违反 2 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C10",
+      "case_name": "分群与时效不符合",
+      "profile_id": "U1004",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Hatchback",
+          "vehicle_age_years": 12,
+          "max_annual_premium": 600,
+          "must_include_coverage": [
+            "third_party"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "SEGMENT_NOT_ELIGIBLE"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P007"
+          ],
+          "must_cover": [
+            "third_party"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P002.annual_premium": 690,
+            "P004.annual_premium": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "需求遗漏保障：third_party"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Hatchback",
+                "age_years": 12
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 600
+              },
+              "coverage_priorities": [],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P004",
+                  "annual_premium": "not_stated",
+                  "deductible": "not_stated",
+                  "flood": "not_stated",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 12，实际 null",
+            "需求遗漏保障：third_party"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Hatchback",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 600
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P004",
+                  "annual_premium": "not_stated",
+                  "deductible": "not_stated",
+                  "flood": "not_stated",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "需求遗漏保障：third_party",
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 SEGMENT_NOT_ELIGIBLE",
+            "推荐首位：可接受 P007，实际 P001",
+            "首位产品优惠后 720 超过预算 600",
+            "P001 违反 3 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P003 违反 2 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 3 项硬条件",
+            "P006 违反 2 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Hatchback",
+                "age_years": 12
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 600
+              },
+              "coverage_priorities": [],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P004",
+                  "annual_premium": "not_stated",
+                  "deductible": "not_stated",
+                  "flood": "not_stated",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C11",
+      "case_name": "频控冲突",
+      "profile_id": "U1002",
+      "typical": true,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "SUV",
+          "vehicle_age_years": 7,
+          "max_annual_premium": 1000,
+          "must_include_coverage": [
+            "roadside"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "FREQUENCY_LIMIT_REACHED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "roadside"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P001.roadside_assistance": "included",
+            "P003.annual_premium": 1080
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 7
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1000
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P006"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车龄：预期 7，实际 null"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1000
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P006"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 FREQUENCY_LIMIT_REACHED",
+            "P001 违反 1 项硬条件",
+            "P002 违反 2 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P007 违反 2 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 7
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1000
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C12",
+      "case_name": "PDP免赔额冲突",
+      "profile_id": "U1001",
+      "typical": true,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "needs_clarification",
+          "vehicle_type": "Sedan",
+          "max_annual_premium": 900,
+          "must_include_coverage": [
+            "flood"
+          ],
+          "must_report_missing": [
+            "vehicle.age_years"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P005",
+            "P008"
+          ],
+          "must_cover": [
+            "flood"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P005.deductible": "not_stated"
+          },
+          "requires_manual_review": true,
+          "required_conflict": "P005.deductible"
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P005",
+                  "annual_premium": 880,
+                  "deductible": "not_stated",
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": [
+                    "deductible: PDP中存在多个不同数值"
+                  ]
+                }
+              ],
+              "requires_manual_review": true
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P005",
+                  "annual_premium": 880,
+                  "deductible": "not_stated",
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": [
+                    "deductible: REGEX_CONFLICT"
+                  ]
+                }
+              ],
+              "requires_manual_review": true
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件",
+            "人工核对：预期 需要，实际 不需要",
+            "应识别字段冲突 P005.deductible"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": [
+                "vehicle.age_years"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P005",
+                  "annual_premium": 880,
+                  "deductible": "not_stated",
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C13",
+      "case_name": "VIP主券频控但叠加券仍可发",
+      "profile_id": "U1005",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "MPV",
+          "vehicle_age_years": 5,
+          "max_annual_premium": 1200,
+          "must_include_coverage": [
+            "flood",
+            "personal_accident",
+            "roadside"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-STACK-20"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P003",
+            "P006"
+          ],
+          "must_cover": [
+            "flood",
+            "personal_accident"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P003.annual_premium": 1080,
+            "P006.deductible": 350
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "MPV",
+                "age_years": 5
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1200
+              },
+              "coverage_priorities": [
+                "flood",
+                "roadside_assistance",
+                "personal_accident"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-STACK-20",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P006",
+                "P003"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "信息状态：预期 complete，实际 needs_clarification",
+            "车型：预期 MPV，实际 unknown",
+            "需求遗漏保障：personal_accident",
+            "发券结论：预期 grant，实际 reject",
+            "选券：预期 CPN-STACK-20，实际 无"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": 5
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1200
+              },
+              "coverage_priorities": [
+                "flood",
+                "roadside_assistance"
+              ],
+              "missing_fields": [
+                "vehicle.type"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "UPSTREAM_FIELDS_INCOMPLETE",
+                "HIGH_RISK_COUPON_BLOCKED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P006",
+                "P003"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-STACK-20，实际 CPN-VIP-100",
+            "推荐首位：可接受 P003/P006，实际 P001",
+            "首位产品 P001 未覆盖 personal_accident",
+            "P001 违反 2 项硬条件",
+            "P002 违反 2 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 2 项硬条件",
+            "P007 违反 2 项硬条件",
+            "P008 违反 2 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "MPV",
+                "age_years": 5
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1200
+              },
+              "coverage_priorities": [
+                "flood",
+                "roadside_assistance",
+                "personal_accident"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C14",
+      "case_name": "新用户已有User Voucher",
+      "profile_id": "U1006",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 1,
+          "max_annual_premium": 650,
+          "must_include_coverage": [
+            "third_party"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "FREQUENCY_LIMIT_REACHED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P002",
+            "P007"
+          ],
+          "must_cover": [
+            "third_party"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P007.flood": "not_stated",
+            "P002.annual_premium": 690
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "需求遗漏保障：third_party",
+            "P007.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 1
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 650
+              },
+              "coverage_priorities": [],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P007",
+                  "annual_premium": 580,
+                  "deductible": 700,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "Chat意图：预期 renew_car_insurance，实际 unknown",
+            "需求遗漏保障：third_party",
+            "P007.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "unknown",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 1
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 650
+              },
+              "coverage_priorities": [],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P007",
+                  "annual_premium": 580,
+                  "deductible": 700,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "需求遗漏保障：third_party",
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 FREQUENCY_LIMIT_REACHED",
+            "推荐首位：可接受 P002/P007，实际 P001",
+            "首位产品优惠后 720 超过预算 650",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件",
+            "P007.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 1
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 650
+              },
+              "coverage_priorities": [],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P007",
+                  "annual_premium": 580,
+                  "deductible": 700,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C15",
+      "case_name": "雨季用户已领防洪券",
+      "profile_id": "U1008",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 4,
+          "max_annual_premium": 950,
+          "must_include_coverage": [
+            "flood"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "FREQUENCY_LIMIT_REACHED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P005",
+            "P008"
+          ],
+          "must_cover": [
+            "flood"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P005.deductible": "not_stated"
+          },
+          "requires_manual_review": true,
+          "required_conflict": "P005.deductible"
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 4
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 950
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P005",
+                  "annual_premium": 880,
+                  "deductible": "not_stated",
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": [
+                    "deductible: PDP中存在多个不同数值"
+                  ]
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": true
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 4
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 950
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P005"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P005",
+                  "annual_premium": 880,
+                  "deductible": "not_stated",
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": [
+                    "deductible: REGEX_CONFLICT"
+                  ]
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": true
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 FREQUENCY_LIMIT_REACHED",
+            "推荐首位：可接受 P005/P008，实际 P001",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件",
+            "人工核对：预期 需要，实际 不需要",
+            "应识别字段冲突 P005.deductible"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 4
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 950
+              },
+              "coverage_priorities": [
+                "flood"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P005",
+                  "annual_premium": 880,
+                  "deductible": "not_stated",
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C16",
+      "case_name": "高车龄SUV仍有窄范围产品",
+      "profile_id": "U1007",
+      "typical": true,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "SUV",
+          "vehicle_age_years": 11,
+          "max_annual_premium": 850,
+          "must_include_coverage": [
+            "roadside"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P008"
+          ],
+          "must_exclude": [
+            "P006"
+          ],
+          "must_cover": [
+            "roadside"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P008.annual_premium": 760,
+            "P006.annual_premium": 960
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 11
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 850
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 11
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 850
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "推荐首位：可接受 P008，实际 P001",
+            "不应推荐硬条件不符产品 P006",
+            "P001 违反 2 项硬条件",
+            "P002 违反 2 项硬条件",
+            "P003 违反 1 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 2 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 2 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "SUV",
+                "age_years": 11
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 850
+              },
+              "coverage_priorities": [
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C17",
+      "case_name": "仅有行为意图但对话缺关键字段",
+      "profile_id": "U1008",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "needs_clarification",
+          "must_report_missing": [
+            "vehicle.type",
+            "vehicle.age_years",
+            "budget.max_annual_premium"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "HIGH_RISK_COUPON_BLOCKED"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P002",
+            "P007",
+            "P008"
+          ]
+        },
+        "comparison": {
+          "assertions": {
+            "P001.annual_premium": 820,
+            "P008.annual_premium": 760
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.type",
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "UPSTREAM_FIELDS_INCOMPLETE",
+                "HIGH_RISK_COUPON_BLOCKED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "Chat意图：预期 renew_car_insurance，实际 unknown"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "unknown",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.type",
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "UPSTREAM_FIELDS_INCOMPLETE",
+                "HIGH_RISK_COUPON_BLOCKED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 HIGH_RISK_COUPON_BLOCKED",
+            "推荐首位：可接受 P002/P007/P008，实际 P001",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "needs_clarification",
+              "vehicle": {
+                "type": "unknown",
+                "age_years": null
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": null
+              },
+              "coverage_priorities": [],
+              "missing_fields": [
+                "vehicle.type",
+                "vehicle.age_years",
+                "budget.max_annual_premium"
+              ]
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C18",
+      "case_name": "LLM首次超时后重试",
+      "profile_id": "U1001",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 3,
+          "max_annual_premium": 900,
+          "must_include_coverage": [
+            "flood",
+            "roadside"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-RENEW-50"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P001",
+            "P008"
+          ],
+          "must_cover": [
+            "flood",
+            "roadside"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P001.flood": "covered",
+            "P008.roadside_assistance": "included"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "P008.roadside_assistance：预期 included，实际 not_stated"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 3
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood",
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P002"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "P008.roadside_assistance：预期 included，实际 not_stated"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 3
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood",
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-RENEW-50",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P008",
+                "P001",
+                "P002"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "选券：预期 CPN-RENEW-50，实际 CPN-VIP-100",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件",
+            "P008.roadside_assistance：预期 included，实际 not_stated"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 3
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 900
+              },
+              "coverage_priorities": [
+                "flood",
+                "roadside_assistance"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P001",
+                  "annual_premium": 820,
+                  "deductible": 400,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P008",
+                  "annual_premium": 760,
+                  "deductible": 500,
+                  "flood": "covered",
+                  "roadside_assistance": "not_stated",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C19",
+      "case_name": "VIP无近期领券记录",
+      "profile_id": "U1009",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Sedan",
+          "vehicle_age_years": 6,
+          "max_annual_premium": 1300,
+          "must_include_coverage": [
+            "flood",
+            "fire",
+            "personal_accident"
+          ]
+        },
+        "voucher": {
+          "decision": "grant",
+          "selected_coupon_id": "CPN-VIP-100"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P003"
+          ],
+          "must_cover": [
+            "flood",
+            "fire",
+            "personal_accident"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P003.annual_premium": 1080,
+            "P006.deductible": 350
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 1,
+          "mismatches": [],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 6
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1300
+              },
+              "coverage_priorities": [
+                "flood",
+                "fire",
+                "personal_accident"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "LLM_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P003"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "需求遗漏保障：personal_accident"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 6
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1300
+              },
+              "coverage_priorities": [
+                "flood",
+                "fire"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "RULE_PREFILTER_PASSED",
+                "DETERMINISTIC_RANK_RECORDED",
+                "FINAL_RULE_CHECK_PASSED"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P003"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 1,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "推荐首位：可接受 P003，实际 P001",
+            "首位产品 P001 未覆盖 fire",
+            "首位产品 P001 未覆盖 personal_accident",
+            "P001 违反 1 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P004 违反 2 项硬条件",
+            "P005 违反 1 项硬条件",
+            "P006 违反 1 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Sedan",
+                "age_years": 6
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 1300
+              },
+              "coverage_priorities": [
+                "flood",
+                "fire",
+                "personal_accident"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P003",
+                  "annual_premium": 1080,
+                  "deductible": 300,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P006",
+                  "annual_premium": 960,
+                  "deductible": 350,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    },
+    {
+      "case_id": "C20",
+      "case_name": "老旧Hatchback价格优先",
+      "profile_id": "U1004",
+      "typical": false,
+      "expected": {
+        "chat": {
+          "intent": "renew_car_insurance",
+          "information_status": "complete",
+          "vehicle_type": "Hatchback",
+          "vehicle_age_years": 12,
+          "max_annual_premium": 600,
+          "must_include_coverage": [
+            "third_party"
+          ]
+        },
+        "voucher": {
+          "decision": "reject",
+          "required_reason": "SEGMENT_NOT_ELIGIBLE"
+        },
+        "recommendation": {
+          "acceptable_top1": [
+            "P007"
+          ],
+          "must_cover": [
+            "third_party"
+          ],
+          "must_be_within_budget": true
+        },
+        "comparison": {
+          "assertions": {
+            "P007.flood": "not_stated",
+            "P002.flood": "not_stated"
+          },
+          "requires_manual_review": false
+        }
+      },
+      "modes": {
+        "hybrid": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "P007.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Hatchback",
+                "age_years": 12
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 600
+              },
+              "coverage_priorities": [
+                "third_party"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P007",
+                  "annual_premium": 580,
+                  "deductible": 700,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "rules_only": {
+          "runs": 5,
+          "chat_pass_rate": 0,
+          "voucher_pass_rate": 1,
+          "recommendation_pass_rate": 1,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "Chat意图：预期 renew_car_insurance，实际 unknown",
+            "P007.flood：预期 not_stated，实际 covered",
+            "P002.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "unknown",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Hatchback",
+                "age_years": 12
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 600
+              },
+              "coverage_priorities": [
+                "third_party"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "reject",
+              "selected_coupon_id": null,
+              "reason_codes": [
+                "NO_ELIGIBLE_COUPON"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P007",
+                "P002",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P007",
+                  "annual_premium": 580,
+                  "deductible": 700,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        },
+        "llm_only": {
+          "runs": 5,
+          "chat_pass_rate": 1,
+          "voucher_pass_rate": 0,
+          "recommendation_pass_rate": 0,
+          "comparison_pass_rate": 0,
+          "full_chain_pass_rate": 0,
+          "mismatches": [
+            "发券结论：预期 reject，实际 grant",
+            "拒绝原因应包含 SEGMENT_NOT_ELIGIBLE",
+            "推荐首位：可接受 P007，实际 P001",
+            "首位产品优惠后 720 超过预算 600",
+            "P001 违反 3 项硬条件",
+            "P002 违反 1 项硬条件",
+            "P003 违反 2 项硬条件",
+            "P004 违反 3 项硬条件",
+            "P005 违反 3 项硬条件",
+            "P006 违反 2 项硬条件",
+            "P007 违反 1 项硬条件",
+            "P008 违反 1 项硬条件",
+            "P007.flood：预期 not_stated，实际 covered"
+          ],
+          "sample_actual": {
+            "chat": {
+              "intent": "renew_car_insurance",
+              "information_status": "complete",
+              "vehicle": {
+                "type": "Hatchback",
+                "age_years": 12
+              },
+              "budget": {
+                "currency": "MYR",
+                "max_annual_premium": 600
+              },
+              "coverage_priorities": [
+                "third_party"
+              ],
+              "missing_fields": []
+            },
+            "voucher": {
+              "decision": "grant",
+              "selected_coupon_id": "CPN-VIP-100",
+              "reason_codes": [
+                "LLM_PREFERENCE_HIGHEST_DISCOUNT"
+              ]
+            },
+            "recommendation": {
+              "product_ids": [
+                "P001",
+                "P002",
+                "P003",
+                "P004",
+                "P005",
+                "P006",
+                "P007",
+                "P008"
+              ]
+            },
+            "comparison": {
+              "products": [
+                {
+                  "product_id": "P007",
+                  "annual_premium": 580,
+                  "deductible": 700,
+                  "flood": "covered",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                },
+                {
+                  "product_id": "P002",
+                  "annual_premium": 690,
+                  "deductible": 600,
+                  "flood": "not_stated",
+                  "roadside_assistance": "included",
+                  "conflicts": []
+                }
+              ],
+              "requires_manual_review": false
+            }
+          }
+        }
+      }
+    }
+  ]
+}

@@ -10,7 +10,8 @@
     "start": "tsx src/server/index.ts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "evaluate": "tsx src/server/evaluate.ts"
+    "evaluate": "tsx src/server/evaluate.ts",
+    "showcase": "tsx src/server/showcase.ts"
   },
   "dependencies": {
     "cors": "2.8.5",

@@ -1,11 +1,9 @@
-import { Agent, request } from 'node:https';
 import type { Coupon, InsuranceProduct, PdpDocument, UserNeed, UserProfile } from '../../shared/types';
 import { pdpTextFor } from '../services/pdpText';
 import type { LLMCallOptions, LLMProvider, LLMUsage } from './LLMProvider';
 
 type JsonSchema=Record<string,unknown>;
 type GeminiResponse={candidates?:Array<{content?:{parts?:Array<{text?:string}>}}> ;usageMetadata?:{promptTokenCount?:number;candidatesTokenCount?:number};error?:{message?:string}};
-const geminiHttpsAgent=new Agent({keepAlive:true,keepAliveMsecs:10000,maxSockets:1,maxFreeSockets:1});
 
 const string={type:'STRING'};
 const number={type:'NUMBER'};
@@ -20,8 +18,17 @@ const rankedProductsSchema:JsonSchema={type:'ARRAY',items:{type:'OBJECT',propert
 const statedNumber={anyOf:[number,{type:'STRING',enum:['not_stated']}]};
 const comparisonResponseSchema:JsonSchema={type:'OBJECT',properties:{products:{type:'ARRAY',items:{type:'OBJECT',properties:{product_id:string,product_name:string,insurer:string,annual_premium:statedNumber,discount_amount:number,premium_after_coupon:statedNumber,sum_insured:statedNumber,coverage:{type:'OBJECT',properties:{collision:string,theft:string,flood:string,fire:string,natural_disaster:string,third_party:string,personal_accident:string},required:['collision','theft','flood','fire','natural_disaster','third_party','personal_accident']},deductible:statedNumber,roadside_assistance:string,term_and_waiting_period:string,exclusions:stringArray,claim_channel_and_documents:string,vehicle_eligibility:string,conflicts:stringArray,evidence:{type:'OBJECT',properties:{premium:string,sum_insured:string,deductible:string},required:['premium','sum_insured','deductible']},match_summary:string},required:['product_id','product_name','insurer','annual_premium','discount_amount','premium_after_coupon','sum_insured','coverage','deductible','roadside_assistance','term_and_waiting_period','exclusions','claim_channel_and_documents','vehicle_eligibility','conflicts','evidence','match_summary']}},requires_manual_review:boolean,fallback_status:{type:'STRING',enum:['none','raw_pdp_only','manual_review']},errors:stringArray},required:['products','requires_manual_review','fallback_status','errors']};
 
-function postJson(url:URL,apiKey:string,body:unknown,timeoutMs:number):Promise<GeminiResponse>{
-  return new Promise((resolve,reject)=>{const payload=JSON.stringify(body);const req=request(url,{agent:geminiHttpsAgent,method:'POST',headers:{'Content-Type':'application/json','Content-Length':Buffer.byteLength(payload),'x-goog-api-key':apiKey,'Connection':'keep-alive'}},(res)=>{let raw='';res.setEncoding('utf8');res.on('data',(chunk)=>raw+=chunk);res.on('end',()=>{let parsed:GeminiResponse;try{parsed=JSON.parse(raw) as GeminiResponse}catch{reject(new Error(`GEMINI_INVALID_HTTP_RESPONSE_${res.statusCode}`));return}if(!res.statusCode||res.statusCode>=400){reject(new Error(`GEMINI_HTTP_${res.statusCode}: ${parsed.error?.message??'request failed'}`));return}resolve(parsed)})});req.setTimeout(timeoutMs,()=>req.destroy(new Error('GEMINI_TIMEOUT')));req.on('error',reject);req.end(payload)});
+async function postJson(url:URL,apiKey:string,body:unknown,timeoutMs:number):Promise<GeminiResponse>{
+  const signal=AbortSignal.timeout(timeoutMs);
+  try {
+    const response=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','x-goog-api-key':apiKey},body:JSON.stringify(body),signal});
+    if(!response.ok) throw new Error('GEMINI_HTTP_'+response.status);
+    try { return await response.json() as GeminiResponse; }
+    catch(error) { if(signal.aborted) throw error; throw new Error('GEMINI_INVALID_HTTP_RESPONSE'); }
+  } catch(error) {
+    if(signal.aborted) throw new Error('GEMINI_TIMEOUT');
+    throw error;
+  }
 }
 
 const sleep=(ms:number)=>new Promise((resolve)=>setTimeout(resolve,ms));
@@ -31,7 +38,7 @@ export class GeminiLLMProvider implements LLMProvider {
   readonly name:string;
   private usage:LLMUsage={input_tokens:0,output_tokens:0,estimated_cost_usd:0};
   private nextRequestAt=0;
-  constructor(private readonly apiKey:string,private readonly model='gemini-3.5-flash-lite',private readonly timeoutMs=60000,private readonly maxRetries=2,private readonly minimumIntervalMs=5000){if(!apiKey)throw new Error('GEMINI_API_KEY_MISSING');this.name=`gemini:${model}`}
+  constructor(private readonly apiKey:string,private readonly model='gemini-3.5-flash-lite',private readonly timeoutMs=60000,private readonly maxRetries=2,private readonly minimumIntervalMs=5000,private readonly lifecycle?:{beforeRequest():void;onSuccess():void;onFailure(error:unknown):void}){if(!apiKey)throw new Error('GEMINI_API_KEY_MISSING');this.name=`gemini:${model}`}
   usageSnapshot(){return {...this.usage}}
   private async pace(){const wait=Math.max(0,this.nextRequestAt-Date.now());if(wait)await sleep(wait);this.nextRequestAt=Date.now()+this.minimumIntervalMs}
   private async generate(prompt:string,schema:JsonSchema):Promise<unknown>{
@@ -39,7 +46,7 @@ export class GeminiLLMProvider implements LLMProvider {
     const body={contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{temperature:0,responseMimeType:'application/json',responseSchema:schema}};
     let response:GeminiResponse|undefined;let lastError:unknown;
     for(let attempt=0;attempt<=this.maxRetries;attempt++){
-      try{await this.pace();response=await postJson(url,this.apiKey,body,this.timeoutMs);break}catch(error){lastError=error;if(attempt===this.maxRetries||!transientGeminiError(error))throw error;const backoff=/GEMINI_HTTP_429/.test(String(error))?65000:1000*(2**attempt)+Math.floor(Math.random()*400);process.stderr.write(`Gemini临时异常，第${attempt+1}次重试将在${backoff}ms后进行：${String(error)}\n`);await sleep(backoff)}
+      try{await this.pace();this.lifecycle?.beforeRequest();response=await postJson(url,this.apiKey,body,this.timeoutMs);this.lifecycle?.onSuccess();break}catch(error){this.lifecycle?.onFailure(error);lastError=error;if(attempt===this.maxRetries||!transientGeminiError(error))throw error;const backoff=/GEMINI_HTTP_429/.test(String(error))?65000:1000*(2**attempt)+Math.floor(Math.random()*400);console.warn(`Gemini临时异常，第${attempt+1}次重试将在${backoff}ms后进行：${String(error)}\n`);await sleep(backoff)}
     }
     if(!response)throw lastError;
     this.usage.input_tokens+=response.usageMetadata?.promptTokenCount??0;this.usage.output_tokens+=response.usageMetadata?.candidatesTokenCount??0;
