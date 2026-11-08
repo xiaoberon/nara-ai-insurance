@@ -1,3 +1,4 @@
+import { pdps, products } from './data/catalog';
 import { timingSafeEqual } from 'node:crypto';
 import { resolve } from 'node:path';
 import dotenv from 'dotenv';
@@ -88,6 +89,12 @@ app.post('/live/api/run', express.json({ limit: '1kb' }), async (req, res) => {
   }
 });
 app.use('/live/api', (_req, res) => { res.status(404).json({ error: 'NOT_FOUND' }); });
+app.get('/api/products/:productId/pdp', (req, res) => {
+  const product = products.find(item => item.product_id === req.params.productId);
+  const pdp = pdps.find(item => item.product_id === req.params.productId);
+  if (!product || !pdp) { res.status(404).json({ error: 'NOT_FOUND' }); return; }
+  res.json({ product_name: product.product_name, html: pdp.html });
+});
 app.get('/health', (_req, res) => { res.json({ ok: true }); });
 app.get('/', (_req, res) => { res.sendFile(resolve('dist/client/showcase.html')); });
 app.use(express.static(resolve('dist/client')));

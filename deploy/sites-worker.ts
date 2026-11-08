@@ -1,17 +1,16 @@
+import { pdps, products } from '../src/server/data/catalog';
 import { testCases } from '../src/server/data/testCases';
 import { GeminiLLMProvider } from '../src/server/llm/GeminiLLMProvider';
 import { runFull } from '../src/server/services/runService';
 import type { DecisionMode } from '../src/shared/types';
-import html from '../public/live/index.html';
-import js from '../public/live/live.js';
-import css from '../public/showcase.css';
 
+declare const NARA_WORKBENCH_HTML: string;
+declare const NARA_PDP_HTML: string;
+declare const NARA_WORKBENCH_ASSETS: Record<string,string>;
 interface Statement { bind(...values: (string|number)[]): Statement; first(): Promise<unknown>; run(): Promise<unknown> }
 interface Environment { DB: { prepare(sql: string): Statement }; GEMINI_API_KEY?: string; GEMINI_MODEL?: string; NARA_ALLOWED_COUNTRIES?: string; }
 const cases = testCases.filter(item => ['C01', 'C07', 'C11', 'C12', 'C16'].includes(item.id));
 const modes = new Set(['hybrid', 'rules_only', 'llm_only']);
-const publicReplay = 'https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/';
-const page = html.replace('../replay/', publicReplay).replace('../showcase.css', '/showcase.css');
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
 const error = (code: string, status: number) => json({ error: code }, status);
 const staticFile = (body: string, type: string) => new Response(body, { headers: { 'content-type': type + '; charset=utf-8' } });
@@ -23,9 +22,15 @@ export default {
     const country = request.cf?.country ?? request.headers.get('CF-IPCountry') ?? 'XX';
     if (request.method === 'GET') {
       if (pathname === '/' || pathname === '/live') return Response.redirect(new URL('/live/', request.url));
-      if (pathname === '/live/') return staticFile(page, 'text/html');
-      if (pathname === '/showcase.css') return staticFile(css, 'text/css');
-      if (pathname === '/live/live.js') return staticFile(js, 'application/javascript');
+      if (pathname === '/live/') return staticFile(NARA_WORKBENCH_HTML, 'text/html');
+      if (pathname === '/pdp.html') return staticFile(NARA_PDP_HTML, 'text/html');
+      const productMatch = /^\/api\/products\/([A-Za-z0-9-]+)\/pdp$/.exec(pathname);
+      if (productMatch) {
+        const product = products.find(item => item.product_id === productMatch[1]);
+        const pdp = pdps.find(item => item.product_id === productMatch[1]);
+        return product && pdp ? json({ product_name: product.product_name, html: pdp.html }) : error('NOT_FOUND', 404);
+      }
+      if (Object.hasOwn(NARA_WORKBENCH_ASSETS, pathname)) return staticFile(NARA_WORKBENCH_ASSETS[pathname], pathname.endsWith('.css') ? 'text/css' : 'application/javascript');
       if (pathname === '/live/api/cases') return json({ model, region: country, cases: cases.map(({id, name, message}) => ({ id, name, message })) });
     }
     if (pathname !== '/live/api/run' || request.method !== 'POST') return error('NOT_FOUND', 404);
