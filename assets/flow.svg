@@ -1,1 +1,36 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 163" font-family="Microsoft YaHei,Noto Sans CJK SC,PingFang SC,sans-serif"><rect x="0" y="0" width="960" height="163" rx="14" fill="#f0f5f9"/><rect x="14" y="23" width="222" height="117" rx="14" fill="#ffffff"/><text x="27" y="70" font-size="22" fill="#08796b" font-weight="700">01 需求理解</text><text x="27" y="108" font-size="14" fill="#13283c" font-weight="500">模型抽取 / 结构校验</text><rect x="251" y="23" width="222" height="117" rx="14" fill="#ffffff"/><text x="264" y="70" font-size="22" fill="#08796b" font-weight="700">02 优惠券</text><text x="264" y="108" font-size="14" fill="#13283c" font-weight="500">规则预筛 / 模型排序 / 复核</text><rect x="488" y="23" width="222" height="117" rx="14" fill="#ffffff"/><text x="501" y="70" font-size="22" fill="#08796b" font-weight="700">03 产品推荐</text><text x="501" y="108" font-size="14" fill="#13283c" font-weight="500">规则过滤 / 保障与价格排序</text><rect x="725" y="23" width="222" height="117" rx="14" fill="#ffffff"/><text x="738" y="70" font-size="22" fill="#08796b" font-weight="700">04 详情对比</text><text x="738" y="108" font-size="14" fill="#13283c" font-weight="500">模型抽取 / 证据与冲突校验</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 386" role="img" aria-labelledby="title description" font-family="Microsoft YaHei, PingFang SC, Noto Sans CJK SC, sans-serif">
+  <title id="title">混合决策如何分工</title>
+  <desc id="description">模型理解需求和提取条款。规则决定发券、推荐，并核对条款证据。</desc>
+  <rect width="960" height="386" rx="20" fill="#eff5f7"/>
+  <text x="34" y="48" font-size="30" font-weight="700" fill="#152b39">混合决策如何分工</text>
+  <rect x="714" y="27" width="15" height="15" rx="4" fill="#6a57a5"/>
+  <text x="738" y="41" font-size="17" fill="#152b39">模型</text>
+  <rect x="817" y="27" width="15" height="15" rx="4" fill="#08796b"/>
+  <text x="841" y="41" font-size="17" fill="#152b39">规则</text>
+
+  <rect x="34" y="74" width="436" height="138" rx="13" fill="#fff"/>
+  <text x="54" y="110" font-size="23" font-weight="700" fill="#152b39">01 · 问清续保需求</text>
+  <text x="54" y="149" font-size="18" font-weight="700" fill="#604b99">模型</text>
+  <text x="108" y="149" font-size="18" fill="#243a47">听懂口语里的车型、车龄和偏好</text>
+  <text x="54" y="181" font-size="18" font-weight="700" fill="#08796b">规则</text>
+  <text x="108" y="181" font-size="18" fill="#243a47">缺关键资料就停下来补问</text>
+
+  <rect x="490" y="74" width="436" height="138" rx="13" fill="#fff"/>
+  <text x="510" y="110" font-size="23" font-weight="700" fill="#152b39">02 · 算清能领的券</text>
+  <text x="510" y="149" font-size="18" font-weight="700" fill="#08796b">规则</text>
+  <text x="564" y="149" font-size="18" fill="#243a47">核对资格、领取次数和叠加条件</text>
+  <text x="564" y="181" font-size="18" fill="#243a47">按每款产品计算实际优惠</text>
+
+  <rect x="34" y="226" width="436" height="138" rx="13" fill="#fff"/>
+  <text x="54" y="262" font-size="23" font-weight="700" fill="#152b39">03 · 推荐可投保产品</text>
+  <text x="54" y="301" font-size="18" font-weight="700" fill="#08796b">规则</text>
+  <text x="108" y="301" font-size="18" fill="#243a47">筛掉不承保该车型或车龄的产品</text>
+  <text x="108" y="333" font-size="18" fill="#243a47">按保障和实际价格排序</text>
+
+  <rect x="490" y="226" width="436" height="138" rx="13" fill="#fff"/>
+  <text x="510" y="262" font-size="23" font-weight="700" fill="#152b39">04 · 并排核对条款</text>
+  <text x="510" y="301" font-size="18" font-weight="700" fill="#604b99">模型</text>
+  <text x="564" y="301" font-size="18" fill="#243a47">从产品详情页提取保障和免赔额</text>
+  <text x="510" y="333" font-size="18" font-weight="700" fill="#08796b">规则</text>
+  <text x="564" y="333" font-size="18" fill="#243a47">核对原文，遇到冲突提示人工确认</text>
+</svg>
