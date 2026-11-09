@@ -219,13 +219,22 @@
 
 ### 镜头一 · 开场动画衔接 Nara 首页
 
-左侧保留 Nara 首页的静态参考。右侧四帧按正式成片顺序，从 Nara 标识出现、周围功能图标展开，到首页落位、打开助手。原始开场分镜说明将 Nara 元素的最终位置对齐到首页右下角入口。下面的时间点均取自正式成片。
-
-| 首页静态参考 | 正式成片中的开场关键帧 |
-| --- | --- |
-| ![Nara 首页静态参考](assets/starting-ui.svg) | [![00:26 标识出现](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-1.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-1.jpg)<br>[![00:34 功能图标展开](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-2.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-2.jpg)<br>[![00:42 衔接首页](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-3.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-3.jpg)<br>[![00:50 助手打开](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-4.jpg)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/opening-4.jpg) |
-
-[打开助手开场关键帧](https://www.figma.com/design/qDrQZjREMHG7DOBcmahceX/nara_shopee?node-id=26-5)
+<table>
+  <thead>
+    <tr><th>阶段说明</th><th>原 Figma 帧</th><th>成片画面</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="2" valign="top" width="210">开场动画让 Nara 标志伴随 AI Guided Purchase 字样出场，随后让标志落到 Shopee 首页右下角，自然带出打开助手的入口。</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/2.svg"><img src="assets/demo-video/2.svg" width="335" alt="2 · Nara 标志随 AI Guided Purchase 字样出场"></a><br><strong>2</strong> · Nara 标志随 AI Guided Purchase 字样出场</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/2-2.png"><img src="assets/demo-video/2-2.png" width="335" alt="2-2 · 标志与标题在正式成片中同步出现"></a><br><strong>2-2</strong> · 标志与标题在正式成片中同步出现</td>
+    </tr>
+    <tr>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/3.svg"><img src="assets/demo-video/3.svg" width="335" alt="3 · 标志向 Shopee 首页入口移动"></a><br><strong>3</strong> · 标志向 Shopee 首页入口移动</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/3-3.png"><img src="assets/demo-video/3-3.png" width="335" alt="3-3 · 标志落到首页右下角，成为开启 Nara 的入口"></a><br><strong>3-3</strong> · 标志落到首页右下角，成为开启 Nara 的入口</td>
+    </tr>
+  </tbody>
+</table>
 
 ### 镜头二 · 从问优惠到比较产品
 
@@ -243,7 +252,48 @@
 
 </details>
 
-该组镜头中的权益和金额属于参赛演示脚本。用户退出后的跟进由 Admin 章节接续。 [参赛成片](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink) · [备用播放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/)
+这组镜头中的权益和金额来自参赛演示脚本。
+
+### 镜头三 · 从前台 Agent 转到后台 Admin
+
+<table>
+  <thead>
+    <tr><th>阶段说明</th><th>原 Figma 帧</th><th>成片画面</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td rowspan="2" valign="top" width="210">用户离开前台后，已留下的续保信息和意向信号可以整理成后台跟进线索。动画用信息图标和界面描边，从手机端 Agent 接到 PC 端 Admin。</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/4.svg"><img src="assets/demo-video/4.svg" width="335" alt="4 · 用图标表现用户离开前留下的信息"></a><br><strong>4</strong> · 用图标表现用户离开前留下的信息</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/4-4.png"><img src="assets/demo-video/4-4.png" width="335" alt="4-4 · 用户留下的信号随图标逐个出现"></a><br><strong>4-4</strong> · 用户留下的信号随图标逐个出现</td>
+    </tr>
+    <tr>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/5.svg"><img src="assets/demo-video/5.svg" width="335" alt="5 · 用线条的方向和节奏规划转场"></a><br><strong>5</strong> · 用线条的方向和节奏规划转场</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/5-5.png"><img src="assets/demo-video/5-5.png" width="335" alt="5-5 · 描边勾勒出 PC 后台界面"></a><br><strong>5-5</strong> · 描边勾勒出 PC 后台界面</td>
+    </tr>
+  </tbody>
+</table>
+
+### 镜头四 · 后台线索分层与二次触达
+
+<table>
+  <thead>
+    <tr><th>交互状态</th><th>原 Figma 帧</th><th>成片画面</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top" width="210"><strong>按价值分层。</strong> 后台汇总用户留下的线索，结合续保到期日和意向信号，确定跟进优先级。</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/6.svg"><img src="assets/demo-video/6.svg" width="335" alt="6 · 后台列表按线索价值分层"></a><br><strong>6</strong> · 后台列表按线索价值分层</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/6-6.png"><img src="assets/demo-video/6-6.png" width="335" alt="6-6 · 高亮运营需要查看的线索字段"></a><br><strong>6-6</strong> · 高亮运营需要查看的线索字段</td>
+    </tr>
+    <tr>
+      <td valign="top" width="210"><strong>人工通话二次触达。</strong> 高价值线索由运营人员参考助手摘要和联系记录，进行人工电话跟进。中低价值线索可通过 AI 外呼等方式跟进，此处略。</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/7.svg"><img src="assets/demo-video/7.svg" width="335" alt="7 · 高价值线索的人工跟进面板"></a><br><strong>7</strong> · 高价值线索的人工跟进面板</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/7-7.png"><img src="assets/demo-video/7-7.png" width="335" alt="7-7 · 跟进面板展示助手摘要和联系记录"></a><br><strong>7-7</strong> · 跟进面板展示助手摘要和联系记录</td>
+    </tr>
+  </tbody>
+</table>
+
+[参赛成片](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink) · [备用播放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/)
 
 ## 4 · 总结与复盘
 
