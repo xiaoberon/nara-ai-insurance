@@ -83,7 +83,7 @@ Gemini 是 Google 的大语言模型。在线演示中，混合决策（Hybrid�
 | 详情页无来源字段计数 | 0 | 0 | 0 |
 | 平均全链耗时 | 18.46 秒 | 1.56 毫秒 | 21.21 秒 |
 
-违规项次按每轮的「产品 × 违反条件」累计。历史 Gemini 批次没有记录模型步骤被模拟结果替代。回放页还提供 20 个案例的 300 次早期模拟评测。新版公开重跑待持久任务与独立配额接通。纯模型是本项目移除关键规则后的对照，结论适用范围为本批虚构典型案例。 [历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) · [原始评测数据](public/replay/evaluation.json) · [早期 Mock 评测](assets/mock-evaluation.json)
+违规项次按每轮的「产品 × 违反条件」累计。历史 Gemini 批次没有记录模型步骤被模拟结果替代。回放页还提供 20 个案例的 300 次早期模拟评测。[新版可重新运行评测](https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/)。**现场仅推荐 75 次**，300 次更耗时，Gemini API 配额可能不够。打开页面时推进，已完成的轮次会保存，返回后可以续跑。纯模型是本项目移除关键规则后的对照，结论适用范围为本批虚构典型案例。 [历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) · [原始评测数据](public/replay/evaluation.json) · [早期 Mock 评测](assets/mock-evaluation.json)
 
 | 场景 | 期望行为 | 历史观察 |
 | --- | --- | --- |

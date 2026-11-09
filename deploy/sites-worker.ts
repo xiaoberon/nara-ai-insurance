@@ -1,3 +1,4 @@
+import { evaluationRequest, type BatchDatabase } from './evaluation-jobs';
 import { pdps, products } from '../src/server/data/catalog';
 import { testCases } from '../src/server/data/testCases';
 import { GeminiLLMProvider } from '../src/server/llm/GeminiLLMProvider';
@@ -7,8 +8,7 @@ import type { DecisionMode } from '../src/shared/types';
 declare const NARA_WORKBENCH_HTML: string;
 declare const NARA_PDP_HTML: string;
 declare const NARA_WORKBENCH_ASSETS: Record<string,string>;
-interface Statement { bind(...values: (string|number)[]): Statement; first(): Promise<unknown>; run(): Promise<unknown> }
-interface Environment { DB: { prepare(sql: string): Statement }; GEMINI_API_KEY?: string; GEMINI_MODEL?: string; NARA_ALLOWED_COUNTRIES?: string; }
+interface Environment { DB: BatchDatabase; GEMINI_API_KEY?: string; GEMINI_MODEL?: string; NARA_ALLOWED_COUNTRIES?: string; NARA_BATCH_MAX_CALLS?:string; }
 const cases = testCases.filter(item => ['C01', 'C07', 'C11', 'C12', 'C16'].includes(item.id));
 const modes = new Set(['hybrid', 'rules_only', 'llm_only']);
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
@@ -20,9 +20,13 @@ export default {
     const { pathname } = new URL(request.url);
     const model = env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
     const country = request.cf?.country ?? request.headers.get('CF-IPCountry') ?? 'XX';
+    if (pathname.startsWith('/live/api/evaluations')) {
+      try { return await evaluationRequest(request,env,(env.NARA_ALLOWED_COUNTRIES??'').split(',').includes(country)); }
+      catch { return error('BATCH_UNAVAILABLE',503); }
+    }
     if (request.method === 'GET') {
       if (pathname === '/' || pathname === '/live') return Response.redirect(new URL('/live/', request.url));
-      if (pathname === '/live/') return staticFile(NARA_WORKBENCH_HTML, 'text/html');
+      if ((pathname === '/live/' || pathname === '/live/evaluation/') ) return staticFile(NARA_WORKBENCH_HTML, 'text/html');
       if (pathname === '/pdp.html') return staticFile(NARA_PDP_HTML, 'text/html');
       const productMatch = /^\/api\/products\/([A-Za-z0-9-]+)\/pdp$/.exec(pathname);
       if (productMatch) {

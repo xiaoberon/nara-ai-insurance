@@ -16,3 +16,11 @@
 - 容器从仓库根目录运行 `docker build -f deploy/Dockerfile -t nara-showcase .`。部署到可访问 Gemini 的支持地区，单实例，超时时间至少 180 秒，平台侧设置独立的 Gemini 项目配额。容器设置服务端密钥 `GEMINI_API_KEY` 与 `NARA_GATEWAY_SECRET`，以及 `GEMINI_MODEL`、`NARA_ALLOWED_COUNTRIES`（经 Google 最新地区列表核对的两位国家代码）和 `NARA_DAILY_MODEL_CALLS`。进程限额按 UTC 日重置，进程重启会重置计数，由供应商配额提供外层保护。
 - 将 `gateway.mjs` 部署到 Cloudflare Worker，设置 `NARA_ORIGIN` 为容器 HTTPS 入口，`NARA_GATEWAY_SECRET` 与容器一致。网关用 Cloudflare 地区元数据覆盖来访请求头。直接访问容器不能绕过 Gemini 调用的地区及网关密钥校验。
 - 公开入口以网关地址为准。部署后检查 `/live/` 的 Gemini 与 Rules Only、`/replay/` 的离线评测数据，以及 `/film/` 的匿名视频播放。更新 README 的入口，并从大陆移动与宽带网络分别验证回放与视频。
+
+## 公开批量评测
+
+线上入口为 `/live/evaluation/`。Cloudflare Sites Worker 使用 D1 表保存批次和逐轮结果。新部署按顺序应用现有配额迁移和 `evaluation-jobs.sql`。设置 `NARA_BATCH_MAX_CALLS` 后才接受公开发起，当前部署上限为每批 650 次模型请求。服务端每天最多接受一批，最多一个进行中的批次。只有支持地区可以发起或推进。批量任务与单案例使用独立的应用层限制，Gemini 供应商配额仍可能共享。
+
+浏览器在页面打开时逐轮推进。切页、关闭或刷新时保留已写入的轮次，返回后可继续当前公开批次。相同轮次有服务端租约与唯一索引保护。只有全部轮次完成才生成完整报表；遇到上游限流会延后重试，达到本批次上限会保留已完成数量并停止。
+
+现场仅推荐 75 次。300 次所需 API 请求更多，可能因 Gemini 配额不足无法完成。历史评测入口不调用模型。
