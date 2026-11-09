@@ -21,19 +21,9 @@ async function capture(page,name) {
   });
   const keyStep=name==='c01'?details.locator('.trace-step').first():details.locator('.trace-step').filter({hasText:'规则预筛 CPN-RENEW-50'});
   await keyStep.evaluate(element=>element.setAttribute('data-capture-detail',''));
-  const annotations=[
-    ['.stage-grid .brain','①'],
-    ['[data-capture-detail]','②'],
-    ['.customer-view','③']
-  ];
-  for(const [selector,label] of annotations){
-    await page.locator(selector).first().evaluate((element,value)=>element.setAttribute('data-capture-marker',value),label);
-  }
   await page.addStyleTag({content:`.stage-grid > article > pre{min-height:0!important;max-height:310px!important}
-    .stage-grid .technical-bundle[open] > .trace-step:not([data-capture-detail]) > div:nth-of-type(2){display:none}
-    [data-capture-marker]{outline:2px solid #bd343c;outline-offset:-2px;position:relative}
-    [data-capture-marker]::after{content:attr(data-capture-marker);position:absolute;right:12px;top:8px;background:#ae2833;color:white;padding:2px 9px;border-radius:6px;font-weight:bold;z-index:5}`});
-  await page.screenshot({path:'public/showcase-media/v8-'+name+'-workbench.png',fullPage:true});
+    .stage-grid .technical-bundle[open] > .trace-step:not([data-capture-detail]) > div:nth-of-type(2){display:none}`});
+  await page.screenshot({path:'public/showcase-media/v9-'+name+'-workbench.png',fullPage:true});
 }
 (async()=>{
   const browser=await chromium.launch({channel:'msedge',headless:true});
@@ -59,7 +49,21 @@ async function capture(page,name) {
     await page.waitForTimeout(6500);
     console.log('Rules=0, C01 calls='+normal.modelCalls+', P005 sources verified');
     }
-    const blocked=await run(page,'C11');
+    let blocked;
+    if(process.env.NARA_CAPTURE_C11_RULES){
+      await run(page,'C11','rules_only');
+      const age=page.getByRole('spinbutton',{name:'车龄'});
+      await age.fill('7');
+      const pending=page.waitForResponse(r=>r.url().endsWith('/live/api/run'));
+      await page.getByRole('button',{name:'确认答案并继续'}).click();
+      const response=await pending;
+      assert(response.ok());
+      blocked=await response.json();
+      assert.equal(blocked.modelCalls,0);
+      console.log('C11 captured in Rules Only after confirming the stated 7-year vehicle age');
+    }else{
+      blocked=await run(page,'C11');
+    }
     assert.equal(blocked.result.stages.coupon.output.decision,'reject');
     await page.locator('.stepper').getByRole('button',{name:'优惠券决策'}).click();
     await page.getByText('续保券已达到领取次数上限，本次没有其他符合条件的券。').waitFor();
