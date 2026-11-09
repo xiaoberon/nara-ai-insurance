@@ -1,5 +1,8 @@
+import { sampleAnswers, type Answers } from '../src/server/services/clarification';
+import { confirmAnswers } from '../src/server/services/clarification';
+import { readContinuation, signContinuation } from './continuation';
 import { evaluationRequest, type BatchDatabase } from './evaluation-jobs';
-import { pdps, products } from '../src/server/data/catalog';
+import { pdps, products, users } from '../src/server/data/catalog';
 import { testCases } from '../src/server/data/testCases';
 import { GeminiLLMProvider } from '../src/server/llm/GeminiLLMProvider';
 import { runFull } from '../src/server/services/runService';
@@ -7,8 +10,9 @@ import type { DecisionMode } from '../src/shared/types';
 
 declare const NARA_WORKBENCH_HTML: string;
 declare const NARA_PDP_HTML: string;
+declare const NARA_EVALUATION_HISTORY:string;
 declare const NARA_WORKBENCH_ASSETS: Record<string,string>;
-interface Environment { DB: BatchDatabase; GEMINI_API_KEY?: string; GEMINI_MODEL?: string; NARA_ALLOWED_COUNTRIES?: string; NARA_BATCH_MAX_CALLS?:string; }
+interface Environment { DB: BatchDatabase; GEMINI_API_KEY?: string; GEMINI_MODEL?: string; NARA_ALLOWED_COUNTRIES?: string; NARA_BATCH_MAX_CALLS?:string; NARA_CONTINUATION_SECRET?:string; }
 const cases = testCases.filter(item => ['C01', 'C07', 'C11', 'C12', 'C16'].includes(item.id));
 const modes = new Set(['hybrid', 'rules_only', 'llm_only']);
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
@@ -27,6 +31,7 @@ export default {
     if (request.method === 'GET') {
       if (pathname === '/' || pathname === '/live') return Response.redirect(new URL('/live/', request.url));
       if ((pathname === '/live/' || pathname === '/live/evaluation/') ) return staticFile(NARA_WORKBENCH_HTML, 'text/html');
+      if (pathname === '/replay/evaluation.json') return staticFile(NARA_EVALUATION_HISTORY,'application/json');
       if (pathname === '/pdp.html') return staticFile(NARA_PDP_HTML, 'text/html');
       const productMatch = /^\/api\/products\/([A-Za-z0-9-]+)\/pdp$/.exec(pathname);
       if (productMatch) {
@@ -41,13 +46,28 @@ export default {
     if (request.headers.get('origin') !== new URL(request.url).origin ||
         !request.headers.get('content-type')?.startsWith('application/json')) return error('INVALID_CASE_OR_MODE', 400);
     const raw = await request.text();
-    if (raw.length > 1024) return error('INVALID_CASE_OR_MODE', 400);
-    let body: { caseId?: string; mode?: DecisionMode } | null;
+    if (raw.length > 50000) return error('INVALID_CASE_OR_MODE', 400);
+    let body: { caseId?: string; mode?: DecisionMode; token?:unknown; answers?:unknown; useExample?:boolean } | null;
     try { body = JSON.parse(raw); } catch { return error('INVALID_CASE_OR_MODE', 400); }
     const item = cases.find(entry => entry.id === body?.caseId);
-    if (!item || !body?.mode || !modes.has(body.mode) || Object.keys(body).length !== 2) return error('INVALID_CASE_OR_MODE', 400);
+    if (!item || !body?.mode || !modes.has(body.mode) || Object.keys(body).some(k=>!['caseId','mode','token','answers','useExample'].includes(k))) return error('INVALID_CASE_OR_MODE', 400);
     const mode = body.mode;
-    if (mode === 'rules_only') return json({ model: null, modelCalls: 0, result: await runFull({ case: item, mode }) });
+    const secret=env.NARA_CONTINUATION_SECRET;
+    const input:Parameters<typeof runFull>[0]={case:item,mode};
+    if(body.token!==undefined){
+      const state=secret?await readContinuation(body.token,secret,item.id,mode):null;
+      if(!state?.chat.output)return error('CONTINUATION_EXPIRED',400);
+      const profile=users.find(user=>user.user_id===item.profile_id)!;
+      const values=body.useExample===true?sampleAnswers(state.chat.output,profile):body.answers;
+      const need=confirmAnswers(state.chat.output,values);
+      if(!need)return error('INVALID_ANSWERS',400);
+      input.continuation={chat:state.chat,need,source:body.useExample===true?'example':'answers',values:values as Answers};
+    }else if(body.answers!==undefined||body.useExample!==undefined)return error('CONTINUATION_EXPIRED',400);
+    async function respond(result:Awaited<ReturnType<typeof runFull>>,modelName:string|null,calls:number){
+      const token=result.clarification&&secret?await signContinuation({caseId:item!.id,mode,chat:result.stages.chat},secret):null;
+      return json({model:modelName,modelCalls:calls,result,token});
+    }
+    if(mode==='rules_only')return respond(await runFull(input),null,0);
     const countries = (env.NARA_ALLOWED_COUNTRIES ?? '').split(',');
     if (!countries.includes(country)) return error('REGION_UNAVAILABLE', 403);
     if (!env.GEMINI_API_KEY || !env.DB) return error('GEMINI_UNAVAILABLE', 503);
@@ -75,9 +95,9 @@ export default {
       onFailure(failure) { upstream = failure; },
     });
     try {
-      const result = await runFull({ case: item, mode }, provider);
-      if (upstream || !calls) throw upstream ?? new Error('GEMINI_EMPTY_RESPONSE');
-      return json({ model, modelCalls: calls, result });
+      const result = await runFull(input,provider);
+      if (upstream || (!calls&&!input.continuation)) throw upstream ?? new Error('GEMINI_EMPTY_RESPONSE');
+      return respond(result,model,calls);
     } catch (failure) {
       const reason = String(upstream ?? failure);
       if (reason.includes('GEMINI_HTTP_429')) return error('GEMINI_QUOTA', 429);

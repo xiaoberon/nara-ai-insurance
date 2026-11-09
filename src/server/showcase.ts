@@ -1,11 +1,13 @@
-import { pdps, products } from './data/catalog';
-import { timingSafeEqual } from 'node:crypto';
+import { pdps, products, users } from './data/catalog';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { resolve } from 'node:path';
 import dotenv from 'dotenv';
 import express from 'express';
 import { testCases } from './data/testCases';
 import { GeminiLLMProvider } from './llm/GeminiLLMProvider';
 import { runFull } from './services/runService';
+import { readContinuation, signContinuation } from '../../deploy/continuation';
+import { confirmAnswers, sampleAnswers, type Answers } from './services/clarification';
 import type { DecisionMode } from '../shared/types';
 
 dotenv.config();
@@ -15,6 +17,7 @@ const modes = new Set(['hybrid', 'rules_only', 'llm_only']);
 const key = process.env.GEMINI_API_KEY?.trim();
 const model = process.env.GEMINI_MODEL?.trim() || 'gemini-3.5-flash-lite';
 const gatewaySecret = process.env.NARA_GATEWAY_SECRET;
+const continuationSecret = process.env.NARA_CONTINUATION_SECRET ?? gatewaySecret ?? randomBytes(32).toString('hex');
 const countries = new Set((process.env.NARA_ALLOWED_COUNTRIES ?? '').toUpperCase().split(',').map(code => code.trim()).filter(Boolean));
 const hosted = process.env.NARA_PUBLIC === '1';
 const maxAttempts = Number(process.env.NARA_DAILY_MODEL_CALLS ?? 120);
@@ -31,15 +34,27 @@ app.disable('x-powered-by');
 app.get('/live/api/cases', (_req, res) => {
   res.json({ model, cases: cases.map(({id, name, message}) => ({ id, name, message })) });
 });
-app.post('/live/api/run', express.json({ limit: '1kb' }), async (req, res) => {
+app.post('/live/api/run', express.json({ limit: '50kb' }), async (req, res) => {
   res.set('Cache-Control', 'no-store');
   const body = req.body ?? {};
   const item = cases.find(entry => entry.id === body.caseId);
-  if (!item || !modes.has(body.mode) || Object.keys(body).length !== 2) {
+  if (!item || !modes.has(body.mode) || Object.keys(body).some(field => !['caseId', 'mode', 'token', 'answers', 'useExample'].includes(field))) {
     res.status(400).json({ error: 'INVALID_CASE_OR_MODE' });
     return;
   }
   const mode = body.mode as DecisionMode;
+  const input: Parameters<typeof runFull>[0] = { case: item, mode };
+  if (body.token !== undefined) {
+    const state = await readContinuation(body.token, continuationSecret, item.id, mode);
+    if (!state?.chat.output) { res.status(400).json({ error: 'CONTINUATION_EXPIRED' }); return; }
+    const profile = users.find(user => user.user_id === item.profile_id)!;
+    const values = body.useExample === true ? sampleAnswers(state.chat.output, profile) : body.answers;
+    const need = confirmAnswers(state.chat.output, values);
+    if (!need) { res.status(400).json({ error: 'INVALID_ANSWERS' }); return; }
+    input.continuation = { chat: state.chat, need, values: values as Answers, source: body.useExample === true ? 'example' : 'answers' };
+  } else if (body.answers !== undefined || body.useExample !== undefined) {
+    res.status(400).json({ error: 'CONTINUATION_EXPIRED' }); return;
+  }
   if (mode !== 'rules_only' && hosted) {
     const expected = Buffer.from(gatewaySecret ?? '');
     const received = Buffer.from(req.get('X-Nara-Gateway') ?? '');
@@ -71,11 +86,12 @@ app.post('/live/api/run', express.json({ limit: '1kb' }), async (req, res) => {
   }) : undefined;
   busy = true;
   try {
-    const result = await runFull({ case: item, mode }, provider);
-    if (upstreamError || (provider && successfulCalls === 0)) {
+    const result = await runFull(input, provider);
+    if (upstreamError || (provider && successfulCalls === 0 && !input.continuation)) {
       throw upstreamError ?? new Error('GEMINI_EMPTY_RESPONSE');
     }
-    res.json({ model: provider ? model : null, modelCalls: successfulCalls, result });
+    const token = result.clarification ? await signContinuation({ caseId: item.id, mode, chat: result.stages.chat }, continuationSecret) : null;
+    res.json({ model: provider ? model : null, modelCalls: successfulCalls, result, token });
   } catch (error) {
     const detail = String(upstreamError ?? error);
     const quota = /NARA_DAILY_QUOTA|GEMINI_HTTP_429/.test(detail);
@@ -96,6 +112,6 @@ app.get('/api/products/:productId/pdp', (req, res) => {
   res.json({ product_name: product.product_name, html: pdp.html });
 });
 app.get('/health', (_req, res) => { res.json({ ok: true }); });
-app.get('/', (_req, res) => { res.sendFile(resolve('dist/client/showcase.html')); });
+app.get('/', (_req, res) => { res.sendFile(resolve('dist/client/live/index.html')); });
 app.use(express.static(resolve('dist/client')));
 app.listen(Number(process.env.PORT ?? 3002), hosted ? '0.0.0.0' : '127.0.0.1');

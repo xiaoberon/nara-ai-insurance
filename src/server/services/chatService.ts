@@ -4,10 +4,13 @@ import { userNeedSchema } from '../schemas';
 
 function rulesParse(message: string): UserNeed {
   const type: UserNeed['vehicle']['type'] = message.includes('Sedan') ? 'Sedan' : message.includes('SUV') ? 'SUV' : message.includes('Hatchback') ? 'Hatchback' : 'unknown';
-  const budget = Number(message.match(/预算(?:最好)?(?:别|不)?超过?\s*([0-9]+)/)?.[1] ?? message.match(/预算\s*([0-9]+)/)?.[1] ?? 0) || null;
+  const parsedBudget = Number(message.match(/预算(?:最好)?(?:别|不)?超过?\s*([0-9]+)/)?.[1] ?? message.match(/预算\s*([0-9]+)/)?.[1] ?? 0) || null;
+  const budgetLimits = [...message.matchAll(/(?:预算(?:最多|最高)?|但)\s*(?:不要超过|不超过|别超过)?\s*(\d+)\s*(?:MYR)?\s*(?:以内|以下|为止|，|,|。|$)/g)].map(match=>Number(match[1]));
+  const budgetConflict = new Set(budgetLimits).size > 1;
+  const budget = budgetConflict ? null : parsedBudget;
   const age = Number(message.match(/车龄\s*([0-9]+)/)?.[1] ?? 0) || null;
   const priorities = ['水浸','盗抢','火灾','道路救援','第三者'].filter((word)=>message.includes(word)).map((word)=>({水浸:'flood',盗抢:'theft',火灾:'fire',道路救援:'roadside_assistance',第三者:'third_party'}[word]!));
-  const missing_fields = [...(type==='unknown'?['vehicle.type']:[]),...(age===null?['vehicle.age_years']:[]),...(budget===null?['budget.max_annual_premium']:[])];
+  const missing_fields = [...(type==='unknown'?['vehicle.type']:[]),...(age===null?['vehicle.age_years']:[]),...(budgetConflict?['budget.conflict_requires_confirmation']:budget===null?['budget.max_annual_premium']:[])];
   return { intent:message.includes('续保')?'renew_car_insurance':'unknown', vehicle:{type,age_years:age}, budget:{currency:'MYR',max_annual_premium:budget}, coverage_priorities:priorities, usage:message.includes('通勤')||message.includes('上下班')?'daily_commute':message.includes('长途')?'long_distance':'unknown', price_sensitivity:message.includes('便宜')?'high':'unknown', renewal_urgency:message.includes('两周')?'within_2_weeks':message.includes('月底')||message.includes('一个月')?'within_month':'unknown', missing_fields, information_status:missing_fields.length?'needs_clarification':'complete', evidence_summary:priorities.map((x)=>`关键词命中 ${x}`) };
 }
 

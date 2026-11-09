@@ -40,8 +40,8 @@ async function capture(page,name) {
     await page.getByText('通过资格检查的产品与得分').waitFor();
     if(process.env.NARA_CAPTURE)await capture(page,'c01');
     await page.locator('.stepper').getByRole('button',{name:'产品比较'}).click();
-    await page.getByText('P005 · 免赔额需人工核对').waitFor();
-    await page.getByText(/同时写了 MYR 450 和 MYR 700/).waitFor();
+    await page.getByText('P005 · 免赔额需人工核对').first().waitFor();
+    await page.getByText(/同时写了 MYR 450 和 MYR 700/).first().waitFor();
     await page.waitForTimeout(6500);
     console.log('Rules=0, C01 calls='+normal.modelCalls+', P005 sources verified');
     }
@@ -61,7 +61,7 @@ async function capture(page,name) {
     assert.equal(await page.locator('.customer-view').getByText('资深用户续保额外减 MYR 15 · MYR 15').count(),1);
     await page.locator('.stepper').getByRole('button',{name:'产品推荐'}).click();
     const prices=veteran.result.stages.recommendation.output.recommended_products;
-    assert.equal(prices[0].original_premium-prices[0].premium_after_coupon,65);
+    const p008=prices.find(item=>item.product_id==='P008'); assert.equal(p008.original_premium-p008.premium_after_coupon,65); assert.equal(p008.applied_coupons.length,2);
     console.log('C11 calls='+blocked.modelCalls+', C16 combined=65');
   }finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});

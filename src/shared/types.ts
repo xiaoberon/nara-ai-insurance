@@ -134,6 +134,7 @@ export interface CouponDecision {
   decision: 'grant' | 'reject' | 'review';
   selected_coupon_id: string | null;
   applied_coupons?: Array<{coupon_id:string;name:string;amount:number;tier:"standard"|"extra"}>;
+  offers_by_product?: Record<string,NonNullable<CouponDecision["applied_coupons"]>>;
   discount_value: number;
   currency: 'MYR';
   eligible_product_ids: string[];
@@ -177,6 +178,8 @@ export interface ProductContent {
 }
 
 export interface RecommendedProduct {
+  applied_coupons?: CouponDecision["applied_coupons"];
+  price_unverified?: boolean;
   rank: number;
   product_id: string;
   product_name: string;
@@ -203,6 +206,8 @@ export interface PdpDocument {
 }
 
 export interface ComparisonItem {
+  applied_coupons?: CouponDecision["applied_coupons"];
+  price_unverified?: boolean;
   product_id: string;
   product_name: string;
   insurer: string;
@@ -279,6 +284,8 @@ export interface AuditInfo {
 }
 
 export interface FullRunResult {
+  clarification?: {fields:string[];sample:Record<string,string|number|null>};
+  confirmed?: {source:"answers"|"example";values:Record<string,string|number|null>};
   audit: AuditInfo;
   stages: {
     chat: StageResult<UserNeed>;

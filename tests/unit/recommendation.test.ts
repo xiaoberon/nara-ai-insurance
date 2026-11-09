@@ -8,12 +8,15 @@ import { runRecommendation } from '../../src/server/services/productMatcher';
 const llm=new MockLLMProvider();
 
 describe('Recommendation stage',()=>{
-  it('hard-filters inactive and coupon-out-of-scope products, then explains score',async()=>{
+  it('hard-filters underwriting constraints and keeps products without a voucher at original price',async()=>{
     const need=(await runChat('Sedan车龄3年，两周内续保，预算900，担心水浸，日常通勤。','hybrid',llm)).output!;
     const coupon=(await runCoupon(need,users[0],coupons,products,'hybrid',llm)).output!;
     const result=await runRecommendation(need,users[0],coupon,products,'hybrid',llm);
-    expect(result.output?.recommended_products.map((x)=>x.product_id)).toEqual(['P008','P001','P005','P002']);
+    expect(result.output?.recommended_products.map((x)=>x.product_id)).toEqual(['P008','P001','P005','P003','P007','P002']);
     expect(result.output?.excluded_products.find((x)=>x.product_id==='P004')?.reason_codes).toContain('PRODUCT_INACTIVE');
+    const fullPrice=result.output?.recommended_products.find(item=>item.product_id==='P007');
+    expect(fullPrice?.premium_after_coupon).toBe(fullPrice?.original_premium);
+    expect(fullPrice?.applied_coupons).toEqual([]);
     expect(result.output?.recommended_products[0].score_breakdown.coverage).toBeGreaterThan(0);
     expect(Object.keys(result.output!.recommended_products[0].score_breakdown)).toEqual(['coverage','budget']);
   });
@@ -22,7 +25,7 @@ describe('Recommendation stage',()=>{
     const need=(await runChat('Sedan车龄3年，两周内续保，预算700，只要便宜和第三者责任。','hybrid',llm)).output!;
     const coupon=(await runCoupon(need,users[0],coupons,products,'hybrid',llm)).output!;
     const result=await runRecommendation(need,users[0],coupon,products,'hybrid',llm);
-    expect(result.output?.recommended_products[0].product_id).toBe('P002');
+    expect(result.output?.recommended_products[0].product_id).toBe('P007');
   });
 
   it('keeps only products that support an older Hatchback',async()=>{

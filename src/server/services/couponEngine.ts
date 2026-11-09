@@ -81,11 +81,17 @@ export async function runCoupon(need:UserNeed|null,profile:UserProfile,coupons:C
       return {base,extra:add,ids,amount,reason};
     }),
   ]);
-  const selected=options.filter(x=>!x.reason&&x.ids.length).sort((a,b)=>b.amount-a.amount||a.base.coupon_id.localeCompare(b.base.coupon_id)||(a.extra?.coupon_id??'').localeCompare(b.extra?.coupon_id??''))[0];
+  const ranked=options.filter(x=>!x.reason&&x.ids.length).sort((a,b)=>b.amount-a.amount||a.base.coupon_id.localeCompare(b.base.coupon_id)||(a.extra?.coupon_id??'').localeCompare(b.extra?.coupon_id??''));
+  const selected=ranked[0];
   const rejectedCoupons=evaluations.filter(x=>!x.eligible).map(x=>({coupon_id:x.coupon.coupon_id,reason_code:x.firstFailure!}));
+  const applied=(option:typeof ranked[number]):NonNullable<CouponDecision['applied_coupons']>=>[option.base,...(option.extra?[option.extra]:[])].map(c=>({coupon_id:c.coupon_id,name:c.name,amount:c.discount_value,tier:c.extra_for_established_user?'extra':'standard'}));
+  const offers=Object.fromEntries(products.flatMap(product=>{
+    const option=ranked.find(item=>item.ids.includes(product.product_id));
+    return option?[[product.product_id,applied(option)]]:[];
+  }));
   const decision:CouponDecision=selected?{
     decision:'grant',selected_coupon_id:selected.base.coupon_id,discount_value:selected.amount,currency:'MYR',eligible_product_ids:selected.ids,
-    applied_coupons:[selected.base,...(selected.extra?[selected.extra]:[])].map(c=>({coupon_id:c.coupon_id,name:c.name,amount:c.discount_value,tier:c.extra_for_established_user?'extra':'standard'})),
+    applied_coupons:applied(selected),offers_by_product:offers,
     reason_codes:['RULE_PREFILTER_PASSED','DETERMINISTIC_RANK_RECORDED','FINAL_RULE_CHECK_PASSED'],rejected_coupon_ids:rejectedCoupons,fallback_status:'none',
   }:rejected(['NO_ELIGIBLE_COUPON'],rejectedCoupons);
   trace.push({step_id:'coupon-final-decision',stage:'coupon',kind:'validation',title:'确认本次发放方案',description:selected?'核对选中组合的叠加条件、共同适用产品和实际优惠。':'未找到可发放的券组合。',input:{候选方案:options.map(x=>({券:[x.base.coupon_id,x.extra?.coupon_id].filter(Boolean),优惠:x.amount,共同适用产品:x.ids,排除原因:x.reason}))},logic:'从满足叠加、范围和金额约束的方案中选实际优惠最高的一组',output:{decision},status:selected?'passed':'info',reason_code:selected?'FINAL_RULE_CHECK_PASSED':'NO_ELIGIBLE_COUPON'});

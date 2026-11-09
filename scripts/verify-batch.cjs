@@ -22,14 +22,16 @@ function sqliteAdapter(sqlite){
 (async()=>{
   const worker=(await import('data:text/javascript;base64,'+fs.readFileSync('dist/server/index.js').toString('base64'))).default;
   const origin='https://nara.example';
-  for(const [scope,total] of [['typical',75],['all',300]]){
+  for(const [scope,total] of [['typical',75]]){
     const sqlite=new DatabaseSync(':memory:');
     sqlite.exec(fs.readFileSync('deploy/evaluation-jobs.sql','utf8'));
+    sqlite.exec(fs.readFileSync('deploy/evaluation-policy.sql','utf8'));
     const env={DB:sqliteAdapter(sqlite),GEMINI_API_KEY:'test-key-not-used',NARA_ALLOWED_COUNTRIES:'US',NARA_BATCH_MAX_CALLS:'650'};
     const call=(path,method='GET',body,country='US')=>worker.fetch(new Request(origin+path,{
       method,headers:{origin,'CF-IPCountry':country,'content-type':'application/json'},body:body===undefined?undefined:JSON.stringify(body),
     }),env);
     assert.equal((await call('/live/api/evaluations','POST',{scope},'CN')).status,403);
+    assert.equal((await call('/live/api/evaluations','POST',{scope:'all'})).status,400);
     const created=await call('/live/api/evaluations','POST',{scope});
     assert.equal(created.status,202);
     const job=await created.json();assert.equal(job.total,total);
@@ -45,6 +47,7 @@ function sqliteAdapter(sqlite){
     sqlite.prepare("UPDATE evaluation_jobs SET completed=total,state='completed' WHERE id=?").run(job.id);
     const finished=await (await call(path+'/result')).json();
     assert.equal(finished.execution_count,total);
+    assert.equal(finished.evaluation_version,'v7-clarification-product-pricing');
     assert.equal(finished.case_results.length,total/15);
     assert.equal(finished.case_results[0].modes.rules_only.rounds.length,5);
     assert.equal((await (await call('/live/api/evaluations?scope='+scope)).json()).id,job.id);

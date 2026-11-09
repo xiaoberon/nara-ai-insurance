@@ -6,13 +6,28 @@ import { llmProvider } from '../llm/provider';
 import { runFull } from './runService';
 import { pdpTextFor } from './pdpText';
 
+export const evaluationPolicy='v7-clarification-product-pricing';
+export const gradingRevision='v7.1-actual-comparison-scope';
+type ComparisonExpectation=CaseEvaluationExpectation['comparison']&{sole_eligible_product?:string};
 type StageKey='chat'|'voucher'|'recommendation'|'comparison';
 interface Assessment { pass:boolean; mismatches:string[]; hard_violations:number; ungrounded_fields:number }
-interface CaseAccumulator {case_id:string;case_name:string;profile_id:string;typical:boolean;expected:CaseEvaluationExpectation;modes:Record<DecisionMode,{runs:number;passes:Record<StageKey,number>;full_passes:number;mismatches:Set<string>;sample_actual:unknown;rounds:Array<{round:number;actual:unknown;differences:Record<string,string[]>}>}>}
-export interface ModeMetrics {mode:DecisionMode;runs:number;chat_pass_rate:number;voucher_pass_rate:number;recommendation_pass_rate:number;comparison_pass_rate:number;full_chain_pass_rate:number;hard_condition_violations:number;ungrounded_pdp_fields:number;provider_fallback_runs:number;repeat_consistency:number;schema_pass_rate:number;average_latency_ms:number;input_tokens:number;output_tokens:number;estimated_cost_usd:number}
+interface CaseAccumulator {case_id:string;case_name:string;profile_id:string;typical:boolean;expected:CaseEvaluationExpectation&{expected_pause?:string[];comparison:ComparisonExpectation};modes:Record<DecisionMode,{runs:number;expected_pauses:number;expected_comparison_skips:number;passes:Record<StageKey,number>;full_passes:number;mismatches:Set<string>;sample_actual:unknown;rounds:Array<{round:number;actual:unknown;differences:Record<string,string[]>}>}>}
+export interface ModeMetrics {mode:DecisionMode;runs:number;expected_pauses?:number;expected_comparison_skips?:number;stage_denominators?:Record<StageKey,number>;chat_pass_rate:number;voucher_pass_rate:number|null;recommendation_pass_rate:number|null;comparison_pass_rate:number|null;full_chain_pass_rate:number;hard_condition_violations:number;ungrounded_pdp_fields:number;provider_fallback_runs:number;repeat_consistency:number;schema_pass_rate:number;average_latency_ms:number;input_tokens:number;output_tokens:number;estimated_cost_usd:number}
 
 export const evaluationModes:DecisionMode[]=['hybrid','rules_only','llm_only'];
 const modes=evaluationModes;
+const pauses:Record<string,string[]>={C07:['vehicle_type','vehicle_age'],C12:['vehicle_age']};
+function expectationFor(caseId:string,legacy:boolean){
+  const original=evaluationExpectations[caseId];
+  if(legacy)return original;
+  const comparison:ComparisonExpectation={...original.comparison};
+  if(caseId==='C01'||caseId==='C11'){
+    comparison.requires_manual_review=true;
+    comparison.required_conflict='P005.deductible';
+  }
+  if(caseId==='C16')comparison.sole_eligible_product='P008';
+  return {...original,comparison};
+}
 const typicalCaseIds=['C01','C07','C11','C12','C16'];
 export type EvaluationScope='current'|'typical'|'all';
 const round=(n:number)=>+n.toFixed(3);
@@ -45,7 +60,7 @@ function assessVoucher(run:FullRunResult,expected:CaseEvaluationExpectation['vou
 }
 
 function productCovers(product:InsuranceProduct,coverage:string){const normalized=normalCoverage(coverage);return normalized==='roadside_assistance'?product.roadside_assistance:product.coverage_tags.includes(normalized)}
-function assessRecommendation(run:FullRunResult,testCase:TestCase,expected:CaseEvaluationExpectation['recommendation']):Assessment{
+function assessRecommendation(run:FullRunResult,testCase:TestCase,expected:CaseEvaluationExpectation['recommendation'],legacy=false):Assessment{
   const result=emptyAssessment();const output=run.stages.recommendation.output;const profile=users.find((item)=>item.user_id===testCase.profile_id)!;const need=run.stages.chat.output;
   if(!output){fail(result,'推荐：没有产生输出');return result}
   const ids=output.recommended_products.map((item)=>item.product_id);const top=products.find((item)=>item.product_id===ids[0]);
@@ -53,7 +68,7 @@ function assessRecommendation(run:FullRunResult,testCase:TestCase,expected:CaseE
   for(const id of expected.must_exclude??[])if(ids.includes(id))fail(result,`不应推荐硬条件不符产品 ${id}`);
   if(top)for(const coverage of expected.must_cover??[])if(!productCovers(top,coverage))fail(result,`首位产品 ${top.product_id} 未覆盖 ${coverage}`);
   if(top&&expected.must_be_within_budget&&need?.budget.max_annual_premium!==null){const shown=output.recommended_products[0].premium_after_coupon;if(shown>need!.budget.max_annual_premium!)fail(result,`首位产品优惠后 ${shown} 超过预算 ${need!.budget.max_annual_premium}`)}
-  for(const item of output.recommended_products){const product=products.find((x)=>x.product_id===item.product_id);if(!product)continue;const couponScope=run.stages.coupon.output?.decision==='grant'?run.stages.coupon.output.eligible_product_ids:null;const violations=[!product.active,product.market!==profile.market,!product.eligible_vehicle_types.includes(profile.vehicle_type),profile.vehicle_age_years>product.maximum_vehicle_age_years,Boolean(couponScope&&!couponScope.includes(product.product_id))].filter(Boolean).length;if(violations){result.hard_violations+=violations;fail(result,`${product.product_id} 违反 ${violations} 项硬条件`)}}
+  for(const item of output.recommended_products){const product=products.find((x)=>x.product_id===item.product_id);if(!product)continue;const couponScope=run.stages.coupon.output?.decision==='grant'?run.stages.coupon.output.eligible_product_ids:null;const violations=[!product.active,product.market!==profile.market,!product.eligible_vehicle_types.includes(profile.vehicle_type),profile.vehicle_age_years>product.maximum_vehicle_age_years,Boolean(legacy&&couponScope&&!couponScope.includes(product.product_id))].filter(Boolean).length;if(violations){result.hard_violations+=violations;fail(result,`${product.product_id} 违反 ${violations} 项硬条件`)}}
   return result;
 }
 
@@ -73,24 +88,43 @@ function summarizeActual(run:FullRunResult){return {chat:{intent:run.stages.chat
 export function getEvaluationCases(scope:EvaluationScope,currentCaseId='C01'){
   return scope==='current'?testCases.filter(item=>item.id===currentCaseId):scope==='typical'?testCases.filter(item=>typicalCaseIds.includes(item.id)):testCases;
 }
-export async function compareModes(repeats=1,scope:EvaluationScope='all',currentCaseId='C01',execute:(input:Parameters<typeof runFull>[0])=>Promise<FullRunResult>=runFull,providerName=llmProvider.name){
+export async function compareModes(repeats=1,scope:EvaluationScope='all',currentCaseId='C01',execute:(input:Parameters<typeof runFull>[0])=>Promise<FullRunResult>=runFull,providerName=llmProvider.name,legacy=false){
   const selectedCases=getEvaluationCases(scope,currentCaseId);
   if(!selectedCases.length)throw new Error('EVALUATION_CASE_NOT_FOUND');
-  const caseAccumulators:CaseAccumulator[]=selectedCases.map((item)=>({case_id:item.id,case_name:item.name,profile_id:item.profile_id,typical:typicalCaseIds.includes(item.id),expected:evaluationExpectations[item.id],modes:Object.fromEntries(modes.map((mode)=>[mode,{runs:0,passes:{chat:0,voucher:0,recommendation:0,comparison:0},full_passes:0,mismatches:new Set<string>(),sample_actual:null,rounds:[] as CaseAccumulator["modes"][DecisionMode]["rounds"]}])) as CaseAccumulator['modes']}));
+  const caseAccumulators:CaseAccumulator[]=selectedCases.map((item)=>({case_id:item.id,case_name:item.name,profile_id:item.profile_id,typical:typicalCaseIds.includes(item.id),expected:{...expectationFor(item.id,legacy),...(!legacy&&pauses[item.id]?{expected_pause:pauses[item.id]}:{})},modes:Object.fromEntries(modes.map((mode)=>[mode,{runs:0,expected_pauses:0,expected_comparison_skips:0,passes:{chat:0,voucher:0,recommendation:0,comparison:0},full_passes:0,mismatches:new Set<string>(),sample_actual:null,rounds:[] as CaseAccumulator["modes"][DecisionMode]["rounds"]}])) as CaseAccumulator['modes']}));
   const metrics:ModeMetrics[]=[];
-  for(const mode of modes){let runs=0,chatPass=0,voucherPass=0,recommendationPass=0,comparisonPass=0,fullPass=0,hardViolations=0,ungrounded=0,providerFallbackRuns=0,schemaPassed=0,totalMs=0,inputTokens=0,outputTokens=0,cost=0,consistentCases=0;
-    for(const testCase of selectedCases){const expected=evaluationExpectations[testCase.id];const row=caseAccumulators.find((x)=>x.case_id===testCase.id)!.modes[mode];const repeated:FullRunResult[]=[];
+  for(const mode of modes){let expectedPauses=0,expectedComparisonSkips=0;const denominator={chat:0,voucher:0,recommendation:0,comparison:0};let runs=0,chatPass=0,voucherPass=0,recommendationPass=0,comparisonPass=0,fullPass=0,hardViolations=0,ungrounded=0,providerFallbackRuns=0,schemaPassed=0,totalMs=0,inputTokens=0,outputTokens=0,cost=0,consistentCases=0;
+    for(const testCase of selectedCases){const entry=caseAccumulators.find((x)=>x.case_id===testCase.id)!;const expected=entry.expected;const row=entry.modes[mode];const repeated:FullRunResult[]=[];
       for(let i=0;i<repeats;i++){const run=await execute({case:testCase,mode,persist:false});repeated.push(run);runs++;row.runs++;if(i===0)row.sample_actual=summarizeActual(run);
-        const chat=assessChat(run,expected.chat);const voucher=assessVoucher(run,expected.voucher);const recommendation=assessRecommendation(run,testCase,expected.recommendation);const comparison=assessComparison(run,expected.comparison);const assessments={chat,voucher,recommendation,comparison};row.rounds.push({round:i+1,actual:summarizeActual(run),differences:Object.fromEntries(Object.entries(assessments).map(([key,value])=>[key,value.mismatches]))});
-        for(const [stage,assessment] of Object.entries(assessments) as Array<[StageKey,Assessment]>){if(assessment.pass){row.passes[stage]++;if(stage==='chat')chatPass++;if(stage==='voucher')voucherPass++;if(stage==='recommendation')recommendationPass++;if(stage==='comparison')comparisonPass++}assessment.mismatches.forEach((message)=>row.mismatches.add(message));hardViolations+=assessment.hard_violations;ungrounded+=assessment.ungrounded_fields}
-        if(Object.values(assessments).every((item)=>item.pass)){fullPass++;row.full_passes++}
+        const fields=legacy?undefined:pauses[testCase.id];
+        const paused=Boolean(fields&&fields.every(field=>run.clarification?.fields.includes(field))&&['coupon','recommendation','comparison'].every(key=>run.stages[key as 'coupon'|'recommendation'|'comparison'].error==='AWAITING_CLARIFICATION'));
+        const chat=assessChat(run,expected.chat);
+        if(fields){
+          chat.pass=paused&&run.stages.chat.output?.intent===expected.chat.intent;
+          chat.mismatches=chat.pass?[]:['应识别缺少的必要资料，并暂停所有后续阶段'];
+        }
+        const assessments:Partial<Record<StageKey,Assessment>>={chat};
+        if(!paused){
+          assessments.voucher=assessVoucher(run,expected.voucher);
+          assessments.recommendation=assessRecommendation(run,testCase,expected.recommendation,legacy);
+          const recommended=run.stages.recommendation.output?.recommended_products;
+          const sole=expected.comparison.sole_eligible_product;
+          if(sole&&recommended?.length===1&&recommended[0].product_id===sole&&run.stages.comparison.error==='COMPARISON_INPUT_INVALID'){
+            expectedComparisonSkips++;row.expected_comparison_skips++;
+          }else{
+            assessments.comparison=assessComparison(run,expected.comparison);
+          }
+        }else{expectedPauses++;row.expected_pauses++;}
+        row.rounds.push({round:i+1,actual:{...summarizeActual(run),clarification:run.clarification??null,comparison_status:assessments.comparison?'graded':paused?'waiting_for_clarification':'only_one_eligible_product'},differences:Object.fromEntries(Object.entries(assessments).map(([key,value])=>[key,value.mismatches]))});
+        for(const [stage,assessment] of Object.entries(assessments) as Array<[StageKey,Assessment]>){denominator[stage]++;if(assessment.pass){row.passes[stage]++;if(stage==='chat')chatPass++;if(stage==='voucher')voucherPass++;if(stage==='recommendation')recommendationPass++;if(stage==='comparison')comparisonPass++}assessment.mismatches.forEach(message=>row.mismatches.add(message));hardViolations+=assessment.hard_violations;ungrounded+=assessment.ungrounded_fields}
+        if(Object.values(assessments).every(item=>item.pass)){fullPass++;row.full_passes++}
         if(usedProviderFallback(run))providerFallbackRuns++;schemaPassed+=Object.values(run.stages).filter((stage)=>stage.schema_valid).length;totalMs+=run.audit.total_duration_ms;inputTokens+=run.audit.input_tokens;outputTokens+=run.audit.output_tokens;cost+=run.audit.estimated_cost_usd;
       }
       if(new Set(repeated.map(stable)).size===1)consistentCases++;
     }
-    metrics.push({mode,runs,chat_pass_rate:round(chatPass/runs),voucher_pass_rate:round(voucherPass/runs),recommendation_pass_rate:round(recommendationPass/runs),comparison_pass_rate:round(comparisonPass/runs),full_chain_pass_rate:round(fullPass/runs),hard_condition_violations:hardViolations,ungrounded_pdp_fields:ungrounded,provider_fallback_runs:providerFallbackRuns,repeat_consistency:round(consistentCases/selectedCases.length),schema_pass_rate:round(schemaPassed/(runs*4)),average_latency_ms:round(totalMs/runs),input_tokens:inputTokens,output_tokens:outputTokens,estimated_cost_usd:round(cost)});
+    metrics.push({mode,runs,expected_pauses:expectedPauses,expected_comparison_skips:expectedComparisonSkips,stage_denominators:denominator,chat_pass_rate:round(chatPass/denominator.chat),voucher_pass_rate:denominator.voucher?round(voucherPass/denominator.voucher):null,recommendation_pass_rate:denominator.recommendation?round(recommendationPass/denominator.recommendation):null,comparison_pass_rate:denominator.comparison?round(comparisonPass/denominator.comparison):null,full_chain_pass_rate:round(fullPass/runs),hard_condition_violations:hardViolations,ungrounded_pdp_fields:ungrounded,provider_fallback_runs:providerFallbackRuns,repeat_consistency:round(consistentCases/selectedCases.length),schema_pass_rate:round(schemaPassed/(runs*4)),average_latency_ms:round(totalMs/runs),input_tokens:inputTokens,output_tokens:outputTokens,estimated_cost_usd:round(cost)});
   }
   const providerFallbackRuns=metrics.reduce((sum,item)=>sum+item.provider_fallback_runs,0);
-  return {evaluation_version:'v6-coupon-combinations',generated_at:new Date().toISOString(),llm_provider:providerName,real_llm_result_valid:providerName.startsWith("gemini:")&&providerFallbackRuns===0,provider_fallback_runs:providerFallbackRuns,scope,repeats_per_case:repeats,test_case_count:selectedCases.length,profile_count:new Set(selectedCases.map((item)=>item.profile_id)).size,execution_count:selectedCases.length*modes.length*repeats,note:'结果由本次运行的实际输出逐项对照可见标准答案计算，不预填模式优劣；no superiority values are prefilled. 发生Mock回退时整批仍可导出，但不可作为纯真实LLM评估结论。',metric_definition:{chat:'意图、信息状态及案例关键字段全部符合即通过',voucher:'发/拒结论、券ID及关键拒绝原因符合即通过',recommendation:'首位产品落在可接受集合且无硬条件违规即通过',comparison:'关键PDP字段、冲突与人工核对状态符合即通过',full_chain:'同一次运行四阶段全部通过',safety_red_lines:['推荐硬条件违规数','PDP无来源字段数','Provider回退运行数']},modes:metrics,case_results:caseAccumulators.map((item)=>({...item,modes:Object.fromEntries(modes.map((mode)=>{const value=item.modes[mode];return[mode,{runs:value.runs,chat_pass_rate:round(value.passes.chat/value.runs),voucher_pass_rate:round(value.passes.voucher/value.runs),recommendation_pass_rate:round(value.passes.recommendation/value.runs),comparison_pass_rate:round(value.passes.comparison/value.runs),full_chain_pass_rate:round(value.full_passes/value.runs),mismatches:[...value.mismatches],sample_actual:value.sample_actual,rounds:value.rounds}]}))}))};
+  return {evaluation_version:legacy?'v6-coupon-combinations':evaluationPolicy,...(!legacy?{grading_revision:gradingRevision}:{}),generated_at:new Date().toISOString(),llm_provider:providerName,real_llm_result_valid:providerName.startsWith("gemini:")&&providerFallbackRuns===0,provider_fallback_runs:providerFallbackRuns,scope,repeats_per_case:repeats,test_case_count:selectedCases.length,profile_count:new Set(selectedCases.map((item)=>item.profile_id)).size,execution_count:selectedCases.length*modes.length*repeats,note:'结果由本次运行的实际输出逐项对照可见标准答案计算，不预填模式优劣；no superiority values are prefilled. 发生Mock回退时整批仍可导出，但不可作为纯真实LLM评估结论。',metric_definition:{chat:'意图、信息状态及案例关键字段全部符合即通过',voucher:'发/拒结论、券ID及关键拒绝原因符合即通过',recommendation:'首位产品落在可接受集合且无硬条件违规即通过',comparison:'关键PDP字段、冲突与人工核对状态符合即通过',full_chain:legacy?'同一次运行四阶段全部通过':'按案例验收四阶段或正确补问暂停；按预期未执行不计阶段分母',safety_red_lines:['推荐硬条件违规数','PDP无来源字段数','Provider回退运行数']},modes:metrics,case_results:caseAccumulators.map((item)=>({...item,modes:Object.fromEntries(modes.map((mode)=>{const value=item.modes[mode];return[mode,{runs:value.runs,expected_pauses:value.expected_pauses,expected_comparison_skips:value.expected_comparison_skips,chat_pass_rate:round(value.passes.chat/value.runs),voucher_pass_rate:value.runs>value.expected_pauses?round(value.passes.voucher/(value.runs-value.expected_pauses)):null,recommendation_pass_rate:value.runs>value.expected_pauses?round(value.passes.recommendation/(value.runs-value.expected_pauses)):null,comparison_pass_rate:value.runs>value.expected_pauses+value.expected_comparison_skips?round(value.passes.comparison/(value.runs-value.expected_pauses-value.expected_comparison_skips)):null,full_chain_pass_rate:round(value.full_passes/value.runs),mismatches:[...value.mismatches],sample_actual:value.sample_actual,rounds:value.rounds}]}))}))};
 }
 

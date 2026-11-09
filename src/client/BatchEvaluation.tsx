@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { replayUrl } from './publicShowcase';
 
 type Scope='typical'|'all';
 type Job={id:string; scope:Scope; total:number; completed:number; state:'running'|'completed'|'failed'; availableAt:number; reason:string|null};
@@ -11,6 +10,7 @@ const messages:Record<string,string>={
   BATCH_UNAVAILABLE:'批量服务暂不可用，历史评测仍可查看。',
   CALL_BUDGET:'达到本批次的模型调用上限，已完成的进度已保存。',
   GEMINI_QUOTA:'Gemini 暂时限流。稍后会继续尝试，请保留此页。',
+  POLICY_UPDATED:'本批使用旧策略，已停止推进。',
   BATCH_EXPIRED:'任务已超过续跑时限，已完成的进度已保存。',
   GEMINI_CONFIGURATION:'模型服务配置暂不可用，已完成的进度已保存。',
   GEMINI_RETRY:'模型响应暂时失败。稍后会继续尝试。',
@@ -33,8 +33,8 @@ export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
   useEffect(()=>{
     let active=true;
     request<Job|null>(path).then(value=>{if(active)setShared(value)}).catch(()=>{});
-    Promise.all(['typical','all'].map(scope=>request<Job|null>(path+'?scope='+scope)))
-      .then(values=>{if(active)setLatest(values.filter((value):value is Job=>value!==null))}).catch(()=>{});
+    request<Job|null>(path+'?scope=typical')
+      .then(value=>{if(active&&value)setLatest([value])}).catch(()=>{});
     return ()=>{active=false};
   },[]);
   function select(current:Job){
@@ -61,11 +61,10 @@ export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
     void update(true);
     return ()=>{cancelled=true;if(timer)clearTimeout(timer)};
   },[id,paused,onResult]);
-  async function start(scope:Scope){
-    if(scope==='all'&&!window.confirm('300 次可能耗尽 Gemini API 配额，现场建议选 75 次。仍要启动 300 次吗？'))return;
+  async function start(){
     setStarting(true);setError('');
     try{
-      const current=await request<Job>(path,'POST',{scope});
+      const current=await request<Job>(path,'POST',{scope:'typical'});
       select(current);
     }catch(failure){setError(failure instanceof Error?failure.message:'无法发起评测。')}
     finally{setStarting(false)}
@@ -73,11 +72,10 @@ export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
   const busy=starting||checking||job?.state==='running';
   return <section className="toolbar">
     <div><h2>重新运行三模式评测</h2>
-      <p><strong>现场仅推荐 75 次。</strong> 300 次运行更久，Gemini API 配额可能不够。</p>
+      <p>5 个典型案例 × 3 种模式 × 5 轮。运行时可继续查看下方历史结果。</p>
       <p>请保持此页打开推进任务。关闭或刷新后，已完成的进度保存在服务器，返回后可继续公开批次。</p>
-      <button className="primary" disabled={busy} onClick={()=>void start('typical')}>运行 75 次（推荐）</button>{' '}
-      <button disabled={busy} onClick={()=>void start('all')}>运行 300 次</button>{' '}
-      <a href={replayUrl}>查看历史评测</a>{shared&&shared.id!==id&&!busy&&<button onClick={()=>select(shared)}>继续当前公开批次</button>}{latest.map(item=><button key={item.id} disabled={busy||item.id===id} onClick={()=>select(item)}>查看最新完成的 {item.total} 次评测</button>)}
+      <button className="primary" disabled={busy} onClick={()=>void start()}>重新运行 75 次</button>{' '}
+      {shared&&shared.id!==id&&!busy&&<button onClick={()=>select(shared)}>继续当前公开批次</button>}{latest.map(item=><button key={item.id} disabled={busy||item.id===id} onClick={()=>select(item)}>查看最新完成的 {item.total} 次评测</button>)}
       {job&&<p role="status">已完成 {job.completed}／{job.total} · {job.state==='completed'?'完成':job.state==='failed'?'已停止':'进行中'}{job.reason?' · '+(messages[job.reason]??'稍后重试'):''}</p>}
       {error&&<p role="alert">{error}</p>}
       {paused&&id&&<button onClick={()=>{setPaused(false);setChecking(true)}}>重新连接本次评测</button>}

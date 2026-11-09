@@ -10,7 +10,7 @@
 | 入口 | 打开后可以做什么 |
 | --- | --- |
 | [在线体验](https://nara-gemini-live.xiaoxh.chatgpt.site/live/) | 选一个虚构案例，点击「运行一次四阶段」。无需登录、安装或提供密钥 |
-| [历史评测](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) | 查看已保存的三模式结果、逐案例标准和差异。浏览时不会调用模型 |
+| [三模式评测](https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/) | 默认显示旧版 75 次基线。可查看逐案差异，也可在同页重新运行 75 次 |
 | [参赛成片](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink) · [备用播放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/) | 看用户侧助手如何接续保需求，以及后台如何跟进中途退出的用户 |
 
 在线演示中，混合决策（Hybrid）和纯模型对照（LLM Only）由 Nara 的服务器实际请求 Gemini API，使用返回结果完成相应步骤。纯规则（Rules Only）只执行规则。在线原型采用固定虚构案例，模型调用受地区与额度限制。
@@ -41,32 +41,32 @@
 
 用「两周后续保、三年车龄、预算 MYR 900、担心水浸」贯穿混合决策的四步：
 
-1. **需求理解。** Gemini 提取续保时间、车型、预算与保障偏好。系统检查输出格式，并对缺失项给出补问，用户区展示这些信息如何影响接下来的筛选。
-2. **优惠券。** 检查输入是否足够，再按市场、领取次数、活动期、额度和适用产品筛单券。规则检查叠加关系、共同适用产品和折扣上限，按实际金额确定券组合。资深用户可见额外券提示，点击查看或选择示例追问展开。报价已包含符合条件的额外券。
-3. **产品推荐。** 先按在售、市场、车型、车龄与券范围过滤，再评分。保障分 = 60 × 匹配关注项 ÷ 关注项。预算分 = 40 × 预算匹配比例，券后价在预算内取 1，超预算时按超出额占预算的比例递减，最低为 0。总分 = 已获分 ÷ 可计算维度的满分 × 100。只给了保障偏好且两项匹配一项时，30／60 换算为 50／100，界面标出缺少预算。两项都缺时显示缺少评分依据。同分优先券后价低的产品，再按编号排序。
-4. **产品对比。** 读取各自详情页、统一字段、核对原文。
+1. **需求理解。** Gemini 提取续保时间、车型、预算与保障偏好。系统核对续保意图、车型、车龄及待确认的冲突。缺必要信息时，服务端暂停发券、推荐和对比。访客可以回答补问，或先查看再确认使用虚构示例资料。没有预算时仍可继续，推荐会标明评分依据。
+2. **优惠券。** 检查输入是否足够，再按市场、领取次数、活动期、额度和适用产品筛单券。规则检查叠加关系、共同适用产品和折扣上限，按实际金额确定券组合。以资深用户（C16）为例，虚构画像有 3 次保险购买记录和 24 个月平台使用时长，满足该活动的画像条件。P008 适用 MYR 50 续保券和 MYR 15 专属券。已适用的额外优惠会计入推荐价格，点击可查看原因。
+3. **产品推荐。** 先按在售、市场、车型和车龄检查投保资格，再逐款计算适用券和折扣。没有适用券的产品按原价参与评分。保障分 = 60 × 匹配关注项 ÷ 关注项。预算分 = 40 × 预算匹配比例，券后价在预算内取 1，超预算时按超出额占预算的比例递减，最低为 0。总分 = 已获分 ÷ 可计算维度的满分 × 100。只给了保障偏好且两项匹配一项时，30／60 换算为 50／100，界面标出缺少预算。两项都缺时显示缺少评分依据。同分优先券后价低的产品，再按编号排序。
+4. **产品对比。** 读取各自详情页、统一字段、核对原文。已核对的价格沿用推荐阶段的逐产品计价，逐款展示原价、用券和当前价。详情页价格有冲突时，显示待核对。
 
 ### 同一个工作台，两种决策场景
 
 **正常续保 · 两周内到期且关注水浸（C01）。** ① 条件输入 ② 资格检查与分项得分 ③ 结构化结果 ④ 用户侧的推荐与价格。
 
-[![正常续保 · 两周内到期且关注水浸（C01）关键区域](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-detail.png)
+[![正常续保 · 两周内到期且关注水浸（C01）关键区域](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c01-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c01-detail.png)
 
 <details>
 <summary>在本页展开完整工作台长图</summary>
 
-[![正常续保 · 两周内到期且关注水浸（C01）的工作台长图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c01-workbench.png)
+[![正常续保 · 两周内到期且关注水浸（C01）的工作台长图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c01-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c01-workbench.png)
 
 </details>
 
 **异常处理 · 用户已达到领券次数上限（C11）。** ① 条件输入 ② 券资格与拒券原因 ③ 发放结果 ④ 用户能看到的解释。
 
-[![异常处理 · 用户已达到领券次数上限（C11）关键区域](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-detail.png)
+[![异常处理 · 用户已达到领券次数上限（C11）关键区域](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c11-detail.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c11-detail.png)
 
 <details>
 <summary>在本页展开完整工作台长图</summary>
 
-[![异常处理 · 用户已达到领券次数上限（C11）的工作台长图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/c11-workbench.png)
+[![异常处理 · 用户已达到领券次数上限（C11）的工作台长图](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c11-workbench.png)](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/showcase-media/v7-c11-workbench.png)
 
 </details>
 
@@ -74,7 +74,7 @@
 
 ![三种模式在四阶段及全链上的通过率](assets/evaluation.svg)
 
-以下为旧版策略的历史结果。五个典型案例在每种模式下各跑五轮，**每种模式 25 次，共 75 次执行**。全链通过要求同一轮四阶段都符合预设标准。
+以下图表为旧版策略的历史结果。五个典型案例在每种模式下各跑五轮，**每种模式 25 次，共 75 次执行**。全链通过要求同一轮四阶段都符合预设标准。
 
 | 同批指标 | Hybrid 混合决策 | Rules Only 纯规则 | LLM Only 纯模型 |
 | --- | ---: | ---: | ---: |
@@ -83,7 +83,7 @@
 | 详情页无来源字段计数 | 0 | 0 | 0 |
 | 平均全链耗时 | 18.46 秒 | 1.56 毫秒 | 21.21 秒 |
 
-违规项次按每轮的「产品 × 违反条件」累计。历史 Gemini 批次没有记录模型步骤被模拟结果替代。回放页还提供 20 个案例的 300 次早期模拟评测。[新版可重新运行评测](https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/)。**现场仅推荐 75 次**，300 次更耗时，Gemini API 配额可能不够。纯模型是本项目移除关键规则后的对照，结论适用范围为本批虚构典型案例。 [历史评测回放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/) · [原始评测数据](public/replay/evaluation.json) · [早期 Mock 评测](assets/mock-evaluation.json)
+违规项次按每轮的「产品 × 违反条件」累计。历史 Gemini 批次没有记录模型步骤被模拟结果替代。公开页只提供 75 次重跑。300 次是早期模拟评测，数据单独保存。纯模型是本项目移除关键规则后的对照，结论适用范围为本批虚构典型案例。 [三模式评测](https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/) · [原始评测数据](public/replay/evaluation.json) · [早期 Mock 评测](assets/mock-evaluation.json)
 
 | 场景 | 期望行为 | 历史观察 |
 | --- | --- | --- |
@@ -98,6 +98,18 @@
 - **口语理解和字段约定。** C01、C11 的纯规则结果漏识别口语意图或车龄。C07、C12 的 Hybrid 也出现缺失字段问题。代码核对发现，C07 保存样例中的字段别名与发券拦截条件期待的路径不一致，解释了该样例为何可能漏拦截。
 - **优惠与推荐硬约束。** C11 的纯模型在频控不合格时仍发券，C16 推荐不适用产品。纯模型推荐阶段在这五个案例都未通过。后续应分别回归「该拦住」与「该保留」两种边界。
 - **详情证据和人工核对。** C12 的 Hybrid 对比阶段通过五轮，纯模型样例漏掉了人工核对。后续同时检查冲突是否被标记、证据是否来自对应详情页、结论是否正确交给人工。
+
+**新版判分。** 缺少车型和车龄（C07），或缺少车龄（C12），应补问并暂停。正确暂停计入整体场景通过，按预期未执行的阶段从各阶段分母剔除。补齐车龄后验证详情页冲突，以及访客确认使用示例资料后的续跑，作为独立回归用例。新旧两批的整体指标采用各自的策略与判分口径。
+
+**新版实测。** 同一典型集已完成 75 次执行。Hybrid 和 LLM Only 的模型步骤实际调用 Gemini，Rules Only 使用规则。新版判分纳入两项实际流程：正常续保和领券次数上限案例的推荐中包含 P005，因此应提示免赔额冲突；高车龄案例只剩一款可保产品时，未进行横向对比符合预期。复核直接使用这 75 次的已保存输出。
+
+| 模式 | 场景通过 | 正确暂停次数 | 仅一款可保，未对比 | 四阶段判分次数（按执行顺序） |
+| --- | ---: | ---: | ---: | --- |
+| Hybrid 混合决策 | 25/25 | 10 | 5 | 25 / 15 / 15 / 10 |
+| Rules Only 纯规则 | 15/25 | 10 | 5 | 25 / 15 / 15 / 10 |
+| LLM Only 纯模型 | 10/25 | 10 | 0 | 25 / 15 / 15 / 15 |
+
+[下载新版逐轮报告](https://nara-gemini-live.xiaoxh.chatgpt.site/live/api/evaluations/4d51d106-9d90-43ee-8c77-682d84a05da6/result)
 
 ## 3 · 参赛视频制作
 
