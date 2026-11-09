@@ -6,7 +6,7 @@ const assert=require('node:assert/strict');
  try{
   const page=await browser.newPage();
   await page.goto('https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/');
-  await page.getByRole('heading',{name:'旧版基线 · 75次'}).waitFor({timeout:30000});
+  await page.getByRole('heading',{name:'三模式批量达标率评估'}).waitFor({timeout:30000});
   const resume=page.getByRole('button',{name:'继续当前公开批次'});
   if(await resume.isVisible())await resume.click();
   else{

@@ -45,12 +45,20 @@ const origin='https://nara-gemini-live.xiaoxh.chatgpt.site';
   }
   await page.getByRole('button',{name:'数据库与字段'}).click();
   await page.getByRole('heading',{name:'专属券资格 · 虚构画像对照'}).waitFor();
+  let batchWrites=0;
+  page.on('request',request=>{if(request.method()==='POST'&&request.url().includes('/live/api/evaluations'))batchWrites++});
   await page.goto(origin+'/live/evaluation/');
-  await page.getByRole('heading',{name:'旧版基线 · 75次'}).waitFor();
+  await page.getByRole('heading',{name:'新版完成记录 · 75次'}).waitFor();
+  assert(await page.getByRole('complementary',{name:'新旧评测区别'}).isVisible());
+  const archive=page.locator('details').filter({has:page.getByText('展开旧版 75 次基线',{exact:true})});
+  assert.equal(await archive.getAttribute('open'),null);
+  await archive.getByText('展开旧版 75 次基线',{exact:true}).click();
+  await archive.getByRole('heading',{name:'旧版基线 · 75次'}).waitFor();
   assert(await page.getByRole('button',{name:'重新运行 75 次'}).isVisible());
   assert.equal(await page.getByRole('button',{name:/运行 300 次/}).count(),0);
   await page.setViewportSize({width:390,height:844});
   assert(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+2));
+  assert.equal(batchWrites,0);
   console.log('Public C07 pause + explicit continuation, database, historical 75, and mobile verified');
  } finally{await browser.close()}
 })().catch(error=>{console.error(error);process.exit(1)});

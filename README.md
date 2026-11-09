@@ -10,7 +10,7 @@
 | 入口 | 打开后可以做什么 |
 | --- | --- |
 | [在线体验](https://nara-gemini-live.xiaoxh.chatgpt.site/live/) | 选一个虚构案例，点击「运行一次四阶段」。无需登录、安装或提供密钥 |
-| [三模式评测](https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/) | 默认显示旧版 75 次基线。可查看逐案差异，也可在同页重新运行 75 次 |
+| [三模式评测](https://nara-gemini-live.xiaoxh.chatgpt.site/live/evaluation/) | 默认显示最近完成的新版 75 次评测。可查看逐轮差异、重跑 75 次，或在页末展开旧版基线 |
 | [参赛成片](https://my.feishu.cn/file/QV6sbiMlhoekrXxT16VcyIfJnQc?from=from_copylink) · [备用播放](https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/film/) | 看用户侧助手如何接续保需求，以及后台如何跟进中途退出的用户 |
 
 在线演示中，混合决策（Hybrid）和纯模型对照（LLM Only）由 Nara 的服务器实际请求 Gemini API，使用返回结果完成相应步骤。纯规则（Rules Only）只执行规则。在线原型采用固定虚构案例，模型调用受地区与额度限制。

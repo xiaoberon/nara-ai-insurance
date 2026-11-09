@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 
-type Scope='typical'|'all';
-type Job={id:string; scope:Scope; total:number; completed:number; state:'running'|'completed'|'failed'; availableAt:number; reason:string|null};
+type Job={id:string; total:number; completed:number; state:'running'|'completed'|'failed'; availableAt:number; reason:string|null};
 const key='nara-evaluation-job';
 const path='/live/api/evaluations';
 const messages:Record<string,string>={
@@ -21,6 +20,10 @@ async function request<T>(url:string,method='GET',body?:unknown):Promise<T>{
   if(!response.ok)throw new Error(messages[value.error]??'请求失败，请稍后再试。');
   return value;
 }
+async function loadLatestResult(){
+  const latest=await request<Job|null>(path+'?scope=typical');
+  return latest ? request(path+'/'+latest.id+'/result') : null;
+}
 export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
   const [id,setId]=useState(()=>localStorage.getItem(key)??'');
   const [job,setJob]=useState<Job|null>(null);
@@ -29,16 +32,14 @@ export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
   const [paused,setPaused]=useState(false);
   const [checking,setChecking]=useState(Boolean(id));
   const [shared,setShared]=useState<Job|null>(null);
-  const [latest,setLatest]=useState<Job[]>([]);
   useEffect(()=>{
     let active=true;
     request<Job|null>(path).then(value=>{if(active)setShared(value)}).catch(()=>{});
-    request<Job|null>(path+'?scope=typical')
-      .then(value=>{if(active&&value)setLatest([value])}).catch(()=>{});
+    loadLatestResult().then(result=>{if(active)onResult(result)}).catch(()=>{if(active)onResult(null)});
     return ()=>{active=false};
-  },[]);
+  },[onResult]);
   function select(current:Job){
-    localStorage.setItem(key,current.id);setJob(current);setError('');setPaused(false);setId(current.id);onResult(null);
+    localStorage.setItem(key,current.id);setJob(current);setError('');setPaused(false);setId(current.id);
   }
   useEffect(()=>{
     if(!id||paused)return;
@@ -49,8 +50,8 @@ export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
         if(cancelled)return;
         setChecking(false);setJob(current);setError('');
         if(current.state==='completed'){
-          const result=await request(path+'/'+id+'/result');
-          if(!cancelled){onResult(result);setLatest(items=>[...items.filter(item=>item.scope!==current.scope),current]);}
+          const result=await loadLatestResult();
+          if(!cancelled)onResult(result);
         }else if(current.state==='running'){
           timer=setTimeout(()=>void update(false),Math.min(15000,Math.max(300,current.availableAt-Date.now())));
         }
@@ -72,10 +73,10 @@ export function BatchEvaluation({onResult}:{onResult:(result:any)=>void}){
   const busy=starting||checking||job?.state==='running';
   return <section className="toolbar">
     <div><h2>重新运行三模式评测</h2>
-      <p>5 个典型案例 × 3 种模式 × 5 轮。运行时可继续查看下方历史结果。</p>
+      <p>5 个典型案例 × 3 种模式 × 5 轮。运行时仍可查看最近完成的一批。</p>
       <p>请保持此页打开推进任务。关闭或刷新后，已完成的进度保存在服务器，返回后可继续公开批次。</p>
       <button className="primary" disabled={busy} onClick={()=>void start()}>重新运行 75 次</button>{' '}
-      {shared&&shared.id!==id&&!busy&&<button onClick={()=>select(shared)}>继续当前公开批次</button>}{latest.map(item=><button key={item.id} disabled={busy||item.id===id} onClick={()=>select(item)}>查看最新完成的 {item.total} 次评测</button>)}
+      {shared&&shared.id!==id&&!busy&&<button onClick={()=>select(shared)}>继续当前公开批次</button>}
       {job&&<p role="status">已完成 {job.completed}／{job.total} · {job.state==='completed'?'完成':job.state==='failed'?'已停止':'进行中'}{job.reason?' · '+(messages[job.reason]??'稍后重试'):''}</p>}
       {error&&<p role="alert">{error}</p>}
       {paused&&id&&<button onClick={()=>{setPaused(false);setChecking(true)}}>重新连接本次评测</button>}
