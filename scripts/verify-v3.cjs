@@ -16,19 +16,29 @@ async function run(page, id, mode='hybrid') {
   throw new Error('Verification failed for '+id);
 }
 async function capture(page,name) {
-  await page.addStyleTag({content:`
-    .stage-grid>article:first-child,.stage-grid>.brain,.stage-grid>article:last-child,.customer-view{outline:3px solid #c32932;outline-offset:-3px;position:relative}
-    .stage-grid>article:first-child::before,.stage-grid>.brain::before,.stage-grid>article:last-child::before,.customer-view::before{position:absolute;right:8px;top:8px;background:#b62029;color:white;padding:2px 9px;border-radius:6px;font-weight:bold;z-index:5}
-    .stage-grid>article:first-child::before{content:'①'}.stage-grid>.brain::before{content:'②'}.stage-grid>article:last-child::before{content:'③'}.customer-view::before{content:'④'}
-    .stage-grid pre{max-height:none!important}
-  `});
-  await page.screenshot({path:'public/showcase-media/'+name+'-workbench.png',fullPage:true});
-  await page.locator('.overview').first().screenshot({path:'public/showcase-media/'+name+'-detail.png'});
+  const details=page.locator('.stage-grid .technical-bundle').filter({
+    has: page.getByText(name==='c01'?'打分明细':'查看逐项校验明细',{exact:true})
+  });
+  const keyStep=name==='c01'?details.locator('.trace-step').first():details.locator('.trace-step').filter({hasText:'规则预筛 CPN-RENEW-50'});
+  await keyStep.evaluate(element=>element.setAttribute('data-capture-detail',''));
+  const annotations=[
+    ['.stage-grid .brain','①'],
+    ['[data-capture-detail]','②'],
+    ['.customer-view','③']
+  ];
+  for(const [selector,label] of annotations){
+    await page.locator(selector).first().evaluate((element,value)=>element.setAttribute('data-capture-marker',value),label);
+  }
+  await page.addStyleTag({content:`.stage-grid > article > pre{min-height:0!important;max-height:310px!important}
+    .stage-grid .technical-bundle[open] > .trace-step:not([data-capture-detail]) > div:nth-of-type(2){display:none}
+    [data-capture-marker]{outline:2px solid #bd343c;outline-offset:-2px;position:relative}
+    [data-capture-marker]::after{content:attr(data-capture-marker);position:absolute;right:12px;top:8px;background:#ae2833;color:white;padding:2px 9px;border-radius:6px;font-weight:bold;z-index:5}`});
+  await page.screenshot({path:'public/showcase-media/v8-'+name+'-workbench.png',fullPage:true});
 }
 (async()=>{
   const browser=await chromium.launch({channel:'msedge',headless:true});
   try{
-    const page=await browser.newPage({viewport:{width:1500,height:960},deviceScaleFactor:2});
+    const page=await browser.newPage({viewport:{width:1040,height:960},deviceScaleFactor:2});
     await page.goto(origin+'/live/');
     await page.getByRole('heading',{name:'Nara AI 保险助手'}).waitFor();
     if(!process.env.NARA_SKIP_NORMAL){
@@ -38,7 +48,11 @@ async function capture(page,name) {
     assert(normal.modelCalls>0);
     await page.locator('.stepper').getByRole('button',{name:'产品推荐'}).click();
     await page.getByText('通过资格检查的产品与得分').waitFor();
-    if(process.env.NARA_CAPTURE)await capture(page,'c01');
+    if(process.env.NARA_CAPTURE){
+      await page.getByText('打分明细',{exact:true}).click();
+      await page.getByText(/超出 MYR/).first().waitFor();
+      await capture(page,'c01');
+    }
     await page.locator('.stepper').getByRole('button',{name:'产品比较'}).click();
     await page.getByText('P005 · 免赔额需人工核对').first().waitFor();
     await page.getByText(/同时写了 MYR 450 和 MYR 700/).first().waitFor();
@@ -50,7 +64,7 @@ async function capture(page,name) {
     await page.locator('.stepper').getByRole('button',{name:'优惠券决策'}).click();
     await page.getByText('续保券已达到领取次数上限，本次没有其他符合条件的券。').waitFor();
     await page.locator('.technical-bundle > summary').click();
-    if(process.env.NARA_CAPTURE)await capture(page,'c11');
+    if(process.env.NARA_CAPTURE){await capture(page,'c11');return;}
     await page.waitForTimeout(6500);
     const veteran=await run(page,'C16');
     assert.equal(veteran.result.stages.coupon.output.discount_value,65);

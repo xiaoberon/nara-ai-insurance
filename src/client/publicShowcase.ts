@@ -4,7 +4,6 @@ export const liveUrl = 'https://nara-gemini-live.xiaoxh.chatgpt.site/live/';
 export const replayUrl = 'https://nara-ai-insurance-poc.xiaoxh.chatgpt.site/replay/';
 export const surface = location.pathname.startsWith('/live/') ? 'live'
   : location.pathname.startsWith('/replay/') || location.hostname === new URL(replayUrl).hostname ? 'replay' : 'local';
-export const publicCases = ['C01', 'C07', 'C11', 'C12', 'C16'];
 const errors: Record<string, string> = {
   REGION_UNAVAILABLE: '当前地区暂未开放 Gemini，可体验纯规则或查看历史评测。',
   GEMINI_QUOTA: '今天的模型额度已用完，可体验纯规则或查看历史评测。',

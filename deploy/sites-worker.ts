@@ -13,7 +13,7 @@ declare const NARA_PDP_HTML: string;
 declare const NARA_EVALUATION_HISTORY:string;
 declare const NARA_WORKBENCH_ASSETS: Record<string,string>;
 interface Environment { DB: BatchDatabase; GEMINI_API_KEY?: string; GEMINI_MODEL?: string; NARA_ALLOWED_COUNTRIES?: string; NARA_BATCH_MAX_CALLS?:string; NARA_CONTINUATION_SECRET?:string; }
-const cases = testCases.filter(item => ['C01', 'C07', 'C11', 'C12', 'C16'].includes(item.id));
+const cases = testCases;
 const modes = new Set(['hybrid', 'rules_only', 'llm_only']);
 const json = (body: unknown, status = 200) => Response.json(body, { status, headers: { 'cache-control': 'no-store' } });
 const error = (code: string, status: number) => json({ error: code }, status);

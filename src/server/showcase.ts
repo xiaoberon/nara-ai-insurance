@@ -12,7 +12,7 @@ import type { DecisionMode } from '../shared/types';
 
 dotenv.config();
 const app = express();
-const cases = testCases.filter(item => ['C01', 'C07', 'C11', 'C12', 'C16'].includes(item.id));
+const cases = testCases;
 const modes = new Set(['hybrid', 'rules_only', 'llm_only']);
 const key = process.env.GEMINI_API_KEY?.trim();
 const model = process.env.GEMINI_MODEL?.trim() || 'gemini-3.5-flash-lite';

@@ -1,5 +1,7 @@
 import type { TestCase } from '../../shared/types';
 
+export const typicalCaseIds = ['C01', 'C07', 'C11', 'C12', 'C16'];
+
 export const testCases: TestCase[] = [
   { id:'C01', category:'normal', name:'两周内续保，关注水浸', message:'我的Sedan车险两周后到期，车龄3年，平时开车上下班，预算最好别超过900 MYR，最近大雨，我担心水浸，便宜一点最好。', profile_id:'U1001', selected_product_ids:['P001','P002'], expected:{ intent:'renew_car_insurance', coupon_eligible:true, required_coverage:['flood'] } },
   { id:'C02', category:'normal', name:'SUV长途驾驶', message:'7年SUV要续保，一个月内到期，预算1000，常跑长途，希望有盗抢和道路救援。', profile_id:'U1002', selected_product_ids:['P001','P003'], expected:{ intent:'renew_car_insurance', coupon_eligible:false, required_coverage:['theft','roadside_assistance'] } },

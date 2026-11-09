@@ -1,7 +1,7 @@
 import type { ComparisonItem, DecisionMode, FullRunResult, InsuranceProduct, TestCase } from '../../shared/types';
 import { pdps, products, users } from '../data/catalog';
 import { evaluationExpectations, type CaseEvaluationExpectation } from '../data/evaluationExpectations';
-import { testCases } from '../data/testCases';
+import { testCases, typicalCaseIds } from '../data/testCases';
 import { llmProvider } from '../llm/provider';
 import { runFull } from './runService';
 import { pdpTextFor } from './pdpText';
@@ -28,7 +28,6 @@ function expectationFor(caseId:string,legacy:boolean){
   if(caseId==='C16')comparison.sole_eligible_product='P008';
   return {...original,comparison};
 }
-const typicalCaseIds=['C01','C07','C11','C12','C16'];
 export type EvaluationScope='current'|'typical'|'all';
 const round=(n:number)=>+n.toFixed(3);
 const stable=(run:FullRunResult)=>JSON.stringify({chat:run.stages.chat.output,coupon:run.stages.coupon.output,recommendation:run.stages.recommendation.output,comparison:run.stages.comparison.output});

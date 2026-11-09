@@ -21,6 +21,20 @@ describe('Recommendation stage',()=>{
     expect(Object.keys(result.output!.recommended_products[0].score_breakdown)).toEqual(['coverage','budget']);
   });
 
+  it('shows how price and missing inputs affect the rounded score',async()=>{
+    const need=(await runChat('Sedan车龄3年续保，预算1000，要水浸和火灾。','hybrid',llm)).output!;
+    const coupon=(await runCoupon(need,users[0],[],products,'hybrid',llm)).output!;
+    const samples=[900,1250,2000].map((annual_premium,index)=>({...products[0],annual_premium,product_id:'S'+index,coverage_tags:['flood']}));
+    const complete=await runRecommendation(need,users[0],coupon,samples,'hybrid',llm);
+    expect(complete.output?.recommended_products.map(item=>item.score_breakdown.budget)).toEqual([40,30,0]);
+    expect(complete.trace.find(item=>item.step_id==='score-S1')?.input).toMatchObject({budget_calculation:{excess:250,divisor:1000,score:30}});
+    const withoutBudget={...need,budget:{...need.budget,max_annual_premium:null}};
+    const coverageOnly=await runRecommendation(withoutBudget,users[0],coupon,samples,'rules_only',llm);
+    expect(coverageOnly.output?.recommended_products.map(item=>item.match_score)).toEqual([50,50,50]);
+    const noPreferences=await runRecommendation({...withoutBudget,coverage_priorities:[]},users[0],coupon,[...samples].reverse(),'rules_only',llm);
+    expect(noPreferences.output?.recommended_products.map(item=>[item.product_id,item.match_score])).toEqual([['S0',0],['S1',0],['S2',0]]);
+  });
+
   it('ranking changes when coverage priority changes',async()=>{
     const need=(await runChat('Sedan车龄3年，两周内续保，预算700，只要便宜和第三者责任。','hybrid',llm)).output!;
     const coupon=(await runCoupon(need,users[0],coupons,products,'hybrid',llm)).output!;
