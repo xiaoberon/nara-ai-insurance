@@ -237,12 +237,12 @@ C07 和 C12 都缺必要资料，三种模式都正确暂停。真正拉开差�
   <tbody>
     <tr>
       <td rowspan="2" valign="top" width="210">开场动画让 Nara 标志伴随 AI Guided Purchase 字样出场，随后让标志落到 Shopee 首页右下角，自然带出打开助手的入口。</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/2.svg"><img src="assets/demo-video/2.svg" width="335" alt="Nara 标志随 AI Guided Purchase 字样出场"></a><br><strong>2</strong> · Nara 标志随 AI Guided Purchase 字样出场</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/2-2.png"><img src="assets/demo-video/2-2.png" width="335" alt="标志与标题在正式成片中同步出现"></a><br><strong>2-2</strong> · 标志与标题在正式成片中同步出现</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/2.svg"><img src="assets/demo-video/2.svg" width="335" alt="Nara 标志随 AI Guided Purchase 字样出场"></a><br><strong></strong> · Nara 标志随 AI Guided Purchase 字样出场</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/2-2.png"><img src="assets/demo-video/2-2.png" width="335" alt="标志与标题在正式成片中同步出现"></a><br><strong></strong> · 标志与标题在正式成片中同步出现</td>
     </tr>
     <tr>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/3.svg"><img src="assets/demo-video/3.svg" width="335" alt="标志向 Shopee 首页入口移动"></a><br><strong>3</strong> · 标志向 Shopee 首页入口移动</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/3-3.png"><img src="assets/demo-video/3-3.png" width="335" alt="标志落到首页右下角，成为开启 Nara 的入口"></a><br><strong>3-3</strong> · 标志落到首页右下角，成为开启 Nara 的入口</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/3.svg"><img src="assets/demo-video/3.svg" width="335" alt="标志向 Shopee 首页入口移动"></a><br><strong></strong> · 标志向 Shopee 首页入口移动</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/3-3.png"><img src="assets/demo-video/3-3.png" width="335" alt="标志落到首页右下角，成为开启 Nara 的入口"></a><br><strong></strong> · 标志落到首页右下角，成为开启 Nara 的入口</td>
     </tr>
   </tbody>
 </table>
@@ -274,12 +274,12 @@ C07 和 C12 都缺必要资料，三种模式都正确暂停。真正拉开差�
   <tbody>
     <tr>
       <td rowspan="2" valign="top" width="210">用户离开前台后，后台把用户留下的续保资料和意向整理成待跟进线索。动画用信息图标和描边，把手机助手接到电脑后台。</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/4.svg"><img src="assets/demo-video/4.svg" width="335" alt="用图标表现用户离开前留下的信息"></a><br><strong>4</strong> · 用图标表现用户离开前留下的信息</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/4-4.png"><img src="assets/demo-video/4-4.png" width="335" alt="用户留下的信号随图标逐个出现"></a><br><strong>4-4</strong> · 用户留下的信号随图标逐个出现</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/4.svg"><img src="assets/demo-video/4.svg" width="335" alt="用图标表现用户离开前留下的信息"></a><br><strong></strong> · 用图标表现用户离开前留下的信息</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/4-4.png"><img src="assets/demo-video/4-4.png" width="335" alt="用户留下的信号随图标逐个出现"></a><br><strong></strong> · 用户留下的信号随图标逐个出现</td>
     </tr>
     <tr>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/5.svg"><img src="assets/demo-video/5.svg" width="335" alt="用线条的方向和节奏规划转场"></a><br><strong>5</strong> · 用线条的方向和节奏规划转场</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/5-5.png"><img src="assets/demo-video/5-5.png" width="335" alt="描边勾勒出 PC 后台界面"></a><br><strong>5-5</strong> · 描边勾勒出 PC 后台界面</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/5.svg"><img src="assets/demo-video/5.svg" width="335" alt="用线条的方向和节奏规划转场"></a><br><strong></strong> · 用线条的方向和节奏规划转场</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/5-5.png"><img src="assets/demo-video/5-5.png" width="335" alt="描边勾勒出 PC 后台界面"></a><br><strong></strong> · 描边勾勒出 PC 后台界面</td>
     </tr>
   </tbody>
 </table>
@@ -293,13 +293,13 @@ C07 和 C12 都缺必要资料，三种模式都正确暂停。真正拉开差�
   <tbody>
     <tr>
       <td valign="top" width="210"><strong>按价值分层。</strong> 后台汇总用户留下的线索，结合续保到期日和意向信号，确定跟进优先级。</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/6.svg"><img src="assets/demo-video/6.svg" width="335" alt="后台列表按线索价值分层"></a><br><strong>6</strong> · 后台列表按线索价值分层</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/6-6.png"><img src="assets/demo-video/6-6.png" width="335" alt="高亮运营需要查看的线索字段"></a><br><strong>6-6</strong> · 高亮运营需要查看的线索字段</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/6.svg"><img src="assets/demo-video/6.svg" width="335" alt="后台列表按线索价值分层"></a><br><strong></strong> · 后台列表按线索价值分层</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/6-6.png"><img src="assets/demo-video/6-6.png" width="335" alt="高亮运营需要查看的线索字段"></a><br><strong></strong> · 高亮运营需要查看的线索字段</td>
     </tr>
     <tr>
       <td valign="top" width="210"><strong>人工通话二次触达。</strong> 高价值线索由运营人员参考助手摘要和联系记录，进行人工电话跟进。中低价值线索可通过 AI 外呼等方式跟进，此处略。</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/7.svg"><img src="assets/demo-video/7.svg" width="335" alt="高价值线索的人工跟进面板"></a><br><strong>7</strong> · 高价值线索的人工跟进面板</td>
-      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/7-7.png"><img src="assets/demo-video/7-7.png" width="335" alt="跟进面板展示助手摘要和联系记录"></a><br><strong>7-7</strong> · 跟进面板展示助手摘要和联系记录</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/7.svg"><img src="assets/demo-video/7.svg" width="335" alt="高价值线索的人工跟进面板"></a><br><strong></strong> · 高价值线索的人工跟进面板</td>
+      <td valign="top"><a href="https://raw.githubusercontent.com/xiaoberon/nara-ai-insurance-poc/main/assets/demo-video/7-7.png"><img src="assets/demo-video/7-7.png" width="335" alt="跟进面板展示助手摘要和联系记录"></a><br><strong></strong> · 跟进面板展示助手摘要和联系记录</td>
     </tr>
   </tbody>
 </table>
