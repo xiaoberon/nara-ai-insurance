@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 563" role="img" aria-labelledby="title desc" font-family="Microsoft YaHei,Noto Sans CJK SC,PingFang SC,sans-serif">
+  <title id="title">新版 75 次 Gemini 评测通过率</title>
+  <desc id="desc">全链路通过率依次为混合决策 100%、纯规则 60%、纯模型 40%。各阶段旁标注通过轮数与计入通过率的轮数。</desc>
+<rect x="0" y="0" width="960" height="563" rx="14" fill="#f0f5f9"/>
+<text x="36" y="50" font-size="30" font-weight="700" fill="#13283c">新版 75 次评测 · 三种模式通过率</text>
+<text x="36" y="79" font-size="17" fill="#486176">5 个典型案例 × 3 种模式 × 5 轮 · 数值旁为通过轮数 / 计入轮数</text>
+<rect x="36" y="98" width="16" height="16" rx="3" fill="#08796b"/>
+<text x="60" y="112" font-size="16" font-weight="650" fill="#13283c">Hybrid 混合决策</text>
+<rect x="304" y="98" width="16" height="16" rx="3" fill="#456aab"/>
+<text x="328" y="112" font-size="16" font-weight="650" fill="#13283c">Rules Only 纯规则</text>
+<rect x="572" y="98" width="16" height="16" rx="3" fill="#a84c29"/>
+<text x="596" y="112" font-size="16" font-weight="650" fill="#13283c">LLM Only 纯模型</text>
+<rect x="23" y="153" width="914" height="75" rx="10" fill="#deeeec"/>
+<text x="185" y="142" font-size="13" text-anchor="middle" fill="#486176">0%</text>
+<line x1="185" y1="151" x2="185" y2="545" stroke="#bed0db" stroke-opacity=".65"/>
+<text x="330" y="142" font-size="13" text-anchor="middle" fill="#486176">25%</text>
+<line x1="330" y1="151" x2="330" y2="545" stroke="#bed0db" stroke-opacity=".65"/>
+<text x="475" y="142" font-size="13" text-anchor="middle" fill="#486176">50%</text>
+<line x1="475" y1="151" x2="475" y2="545" stroke="#bed0db" stroke-opacity=".65"/>
+<text x="620" y="142" font-size="13" text-anchor="middle" fill="#486176">75%</text>
+<line x1="620" y1="151" x2="620" y2="545" stroke="#bed0db" stroke-opacity=".65"/>
+<text x="765" y="142" font-size="13" text-anchor="middle" fill="#486176">100%</text>
+<line x1="765" y1="151" x2="765" y2="545" stroke="#bed0db" stroke-opacity=".65"/>
+<text x="36" y="195" font-size="19" font-weight="700" fill="#13283c">全链路通过</text>
+<rect x="185" y="160" width="580" height="15" rx="4" fill="#08796b"/>
+<text x="775" y="173" font-size="15" font-weight="650" fill="#13283c">100% · 25/25</text>
+<rect x="185" y="181" width="348" height="15" rx="4" fill="#456aab"/>
+<text x="543" y="194" font-size="15" font-weight="650" fill="#13283c">60% · 15/25</text>
+<rect x="185" y="202" width="232" height="15" rx="4" fill="#a84c29"/>
+<text x="427" y="215" font-size="15" font-weight="650" fill="#13283c">40% · 10/25</text>
+<text x="36" y="275" font-size="19" font-weight="700" fill="#13283c">需求理解</text>
+<rect x="185" y="240" width="580" height="15" rx="4" fill="#08796b"/>
+<text x="775" y="253" font-size="15" font-weight="650" fill="#13283c">100% · 25/25</text>
+<rect x="185" y="261" width="348" height="15" rx="4" fill="#456aab"/>
+<text x="543" y="274" font-size="15" font-weight="650" fill="#13283c">60% · 15/25</text>
+<rect x="185" y="282" width="580" height="15" rx="4" fill="#a84c29"/>
+<text x="775" y="295" font-size="15" font-weight="650" fill="#13283c">100% · 25/25</text>
+<text x="36" y="355" font-size="19" font-weight="700" fill="#13283c">发券</text>
+<rect x="185" y="320" width="580" height="15" rx="4" fill="#08796b"/>
+<text x="775" y="333" font-size="15" font-weight="650" fill="#13283c">100% · 15/15</text>
+<rect x="185" y="341" width="193.33" height="15" rx="4" fill="#456aab"/>
+<text x="388.33000000000004" y="354" font-size="15" font-weight="650" fill="#13283c">33.3% · 5/15</text>
+<rect x="185" y="362" width="193.33" height="15" rx="4" fill="#a84c29"/>
+<text x="388.33000000000004" y="375" font-size="15" font-weight="650" fill="#13283c">33.3% · 5/15</text>
+<text x="36" y="435" font-size="19" font-weight="700" fill="#13283c">产品推荐</text>
+<rect x="185" y="400" width="580" height="15" rx="4" fill="#08796b"/>
+<text x="775" y="413" font-size="15" font-weight="650" fill="#13283c">100% · 15/15</text>
+<rect x="185" y="421" width="193.33" height="15" rx="4" fill="#456aab"/>
+<text x="388.33000000000004" y="434" font-size="15" font-weight="650" fill="#13283c">33.3% · 5/15</text>
+<rect x="185" y="442" width="38.67" height="15" rx="4" fill="#a84c29"/>
+<text x="233.67000000000002" y="455" font-size="15" font-weight="650" fill="#13283c">6.7% · 1/15</text>
+<text x="36" y="515" font-size="19" font-weight="700" fill="#13283c">详情对比</text>
+<rect x="185" y="480" width="580" height="15" rx="4" fill="#08796b"/>
+<text x="775" y="493" font-size="15" font-weight="650" fill="#13283c">100% · 10/10</text>
+<text x="195" y="514" font-size="15" font-weight="650" fill="#13283c">0% · 0/10</text>
+<rect x="185" y="522" width="193.33" height="15" rx="4" fill="#a84c29"/>
+<text x="388.33000000000004" y="535" font-size="15" font-weight="650" fill="#13283c">33.3% · 5/15</text>
+</svg>
